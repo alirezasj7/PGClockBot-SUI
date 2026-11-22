@@ -19,6 +19,8 @@ def alembic_config(database_url: str | None = None) -> Config:
     if not ALEMBIC_INI.is_file():
         raise FileNotFoundError(f"Missing {ALEMBIC_INI}")
     cfg = Config(str(ALEMBIC_INI))
+    # In-process migrations must preserve the running application's loggers.
+    cfg.attributes["preserve_logging"] = True
     cfg.set_main_option("script_location", str(ALEMBIC_DIR))
     if database_url:
         from app.db.engine_url import to_sync_url

@@ -14,7 +14,7 @@ from app.db.engine_url import to_sync_url
 import app.db.models  # noqa: F401
 
 config = context.config
-if config.config_file_name is not None:
+if config.config_file_name is not None and not config.attributes.get("preserve_logging"):
     fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
