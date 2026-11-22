@@ -684,6 +684,8 @@ def default_http_panel_url(*, web_port: int | str | None = None) -> str:
 
 def setup_finish_login_url() -> str:
     """Login URL after wizard — HTTPS when TLS is already live, else HTTP+IP."""
+    if get_settings().web_host in {"127.0.0.1", "::1", "localhost"}:
+        return "/login?restarting=1"
     try:
         from app.services.ssl_certs import https_is_active, public_panel_base_url
 
@@ -703,6 +705,8 @@ def force_http_login_url(url: str) -> str:
     Otherwise coerce to http so we never send the operator to a dead HTTPS
     PUBLIC_BASE_URL before a certificate exists.
     """
+    if get_settings().web_host in {"127.0.0.1", "::1", "localhost"}:
+        return setup_finish_login_url()
     try:
         from app.services.ssl_certs import https_is_active
 

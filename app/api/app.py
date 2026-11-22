@@ -402,6 +402,8 @@ SESSION_MAX_AGE = 60 * 60 * 24 * 7
 
 
 def _cookie_secure(request: Request) -> bool:
+    if request.url.scheme == "https":
+        return True
     try:
         from app.services.ssl_certs import https_is_active
 
@@ -426,6 +428,8 @@ def _panel_redirect(request: Request, path: str, *, status_code: int = 303) -> R
     """
     if not path.startswith("/"):
         path = "/" + path
+    if get_settings().web_host in {"127.0.0.1", "::1", "localhost"}:
+        return RedirectResponse(path, status_code=status_code)
     try:
         from app.services.ssl_certs import https_is_active, public_panel_base_url
 
