@@ -14,7 +14,7 @@ from urllib.parse import quote
 
 import httpx
 
-from app.config import get_settings, normalize_pg_subscription_path, pg_api_base_candidates
+from app.config import get_settings, normalize_http_base_url, normalize_pg_subscription_path, pg_api_base_candidates
 from app.services.pg_read_cache import cache_get_last_good, last_good_notice_active, note_last_good_read
 from app.services.redact import redact
 from app.services.pg_read_resilience import DNS_CACHE_TTL_SEC, panel_read_request, reset_read_circuits, validate_panel_base
@@ -150,7 +150,7 @@ class PasarGuardError(Exception):
         from app.services.credential_policy import friendly_pg_error
 
         detail = _pg_error_detail(self.body)
-        base = detail or str(self.args[0] if self.args else "") or (fallback or "خطای پاسارگارد")
+        base = detail or str(self.args[0] if self.args else "") or (fallback or "خطای S-UI")
         return friendly_pg_error(base, status_code=self.status_code)[:500]
 
 
@@ -497,7 +497,7 @@ class PasarGuardClient:
             password = (self.settings.pg_password or "").replace("\r", "").strip()
         if not username or not password:
             raise PasarGuardError(
-                "اعتبارنامه پاسارگارد ناقص است"
+                "اعتبارنامه S-UI ناقص است"
                 if self._login_username
                 else "PG_USERNAME / PG_PASSWORD missing in .env"
             )
@@ -958,13 +958,13 @@ class PasarGuardClient:
             raise PasarGuardError(
                 "نام ادمین نامعتبر است. "
                 "علت محتمل: نام خالی. "
-                "راه حل: نام ادمین پاسارگارد را دوباره انتخاب کنید.",
+                "راه حل: نام ادمین S-UI را دوباره انتخاب کنید.",
                 400,
             )
         admin = await self.get_admin(uname)
         if not admin:
             raise PasarGuardError(
-                f"ادمین «{uname}» در پاسارگارد یافت نشد. "
+                f"ادمین «{uname}» در S-UI یافت نشد. "
                 "علت محتمل: نام اشتباه یا حذف‌شده. "
                 "راه حل: لیست ادمین‌ها را رفرش کنید و دوباره تلاش کنید.",
                 404,
@@ -993,9 +993,9 @@ class PasarGuardClient:
                 errors.append(str(e))
         detail = errors[-1] if errors else "مسیر به‌روزرسانی ادمین در دسترس نیست"
         raise PasarGuardError(
-            f"به‌روزرسانی ادمین پاسارگارد ناموفق بود: {detail}. "
-            "علت محتمل: نسخه پنل پاسارگارد یا دسترسی نقش. "
-            "راه حل: نقش ادمین اصلی و نسخه پاسارگارد را بررسی کنید.",
+            f"به‌روزرسانی ادمین S-UI ناموفق بود: {detail}. "
+            "علت محتمل: نسخه پنل S-UI یا دسترسی نقش. "
+            "راه حل: نقش ادمین اصلی و نسخه S-UI را بررسی کنید.",
             404,
         )
 
@@ -1006,7 +1006,7 @@ class PasarGuardClient:
             raise PasarGuardError("نام ادمین نامعتبر است", 400)
         admin = await self.get_admin(uname)
         if not admin:
-            raise PasarGuardError(f"ادمین «{uname}» در پاسارگارد یافت نشد", 404)
+            raise PasarGuardError(f"ادمین «{uname}» در S-UI یافت نشد", 404)
         admin_id = admin.get("id")
         exact = str(admin.get("username") or uname).strip()
         if admin_id is not None:
@@ -1027,7 +1027,7 @@ class PasarGuardClient:
         raise PasarGuardError(
             f"حذف ادمین «{exact}» ناموفق بود. "
             "علت محتمل: ادمین مالک یا دسترسی ناکافی. "
-            "راه حل: از پنل اصلی پاسارگارد وضعیت را بررسی کنید.",
+            "راه حل: از پنل اصلی S-UI وضعیت را بررسی کنید.",
             404,
         )
 
@@ -1080,7 +1080,7 @@ class PasarGuardClient:
         prefix = subscription_path_from_url(subscription_url) or configured
         origin = urlsplit(self.base_url)
         if origin.scheme not in {"http", "https"} or not origin.netloc:
-            raise PasarGuardError("آدرس پاسارگارد تنظیم نشده است")
+            raise PasarGuardError("آدرس S-UI تنظیم نشده است")
         if not token or any(char in token for char in "/?#\\"):
             raise PasarGuardError("توکن اشتراک نامعتبر است")
         path = f"{prefix}/{quote(token, safe='')}/{suffix}"
@@ -1203,24 +1203,19 @@ def _cached_client_ready(client: Any) -> bool:
 
 
 def is_sui_backend() -> bool:
-    """Whether the additive S-UI adapter is selected in the environment."""
-    return str(get_settings().panel_backend or "").strip().lower() == "sui"
+    """Return whether this distribution uses its only supported panel: S-UI."""
+    return True
 
 
 def get_pg() -> Any:
-    """Platform owner client (PasarGuard by default, S-UI when selected)."""
+    """Return the shared S-UI client used by every panel operation."""
     global _pg
-    desired = "sui" if is_sui_backend() else "pasarguard"
+    desired = "sui"
     if _pg is None or getattr(_pg, "backend_kind", "pasarguard") != desired:
         _retire_client(_pg)
-        if desired == "sui":
-            # Local import avoids a cycle while retaining PasarGuard's public
-            # helper module as the compatibility boundary for existing callers.
-            from app.services.sui import SuiClient
+        from app.services.sui import SuiClient
 
-            _pg = SuiClient()
-        else:
-            _pg = PasarGuardClient()
+        _pg = SuiClient()
     return _pg
 
 
@@ -1320,143 +1315,15 @@ async def _authenticate_and_cache(
 
 
 async def get_pg_for_reseller(session, reseller_user_id: int) -> PasarGuardClient:
-    """PasarGuard client authenticated as the shop's PG admin — never owner token.
-
-    Requires ``pg_admin_username`` plus a stored encrypted API key or password.
-    Priority: API key (X-Api-Key) → password (Bearer via /api/admin/token).
-    """
-    if is_sui_backend():
-        raise PasarGuardError(
-            "حساب‌های نمایندگی در حالت S-UI از اعتبارنامهٔ جداگانه پشتیبانی نمی‌شوند؛ عملیات مالک اصلی را انجام دهید",
-            501,
-        )
-
-    from sqlalchemy import select
-
-    from app.db.models import ResellerProfile
-    from app.services.secret_box import decrypt_secret
-
-    rid = int(reseller_user_id)
-
-    profile = (
-        await session.execute(select(ResellerProfile).where(ResellerProfile.user_id == rid))
-    ).scalar_one_or_none()
-    if not profile or not profile.pg_admin_username:
-        raise PasarGuardError(
-            "ادمین پاسارگارد برای این نماینده تعریف نشده — عملیات فروشگاه ممکن نیست"
-        )
-
-    # Cache key includes the PG admin username: if an operator re-links this
-    # reseller to a different PasarGuard admin, the old cached client (still
-    # authenticated as the previous admin) must never be reused — it would
-    # silently keep acting under the wrong PasarGuard identity/permissions.
-    uname = str(profile.pg_admin_username).strip().lower()
-    cache_key = (rid, uname)
-    cached = _pg_reseller_cache.get(cache_key)
-    if _cached_client_ready(cached):
-        return cached
-
-    from app.services.org_principals import get_principal_by_reseller_profile
-
-    linked = await get_principal_by_reseller_profile(session, int(profile.id))
-    if (
-        linked is not None
-        and str(linked.status) == "active"
-        and int(getattr(linked, "depth", -1) or -1) in (1, 2)
-        and (
-            (getattr(linked, "pg_api_key_enc", None) or "").strip()
-            or (linked.pg_password_enc or "").strip()
-        )
-        and (linked.pg_username or "").strip()
-    ):
-        return await get_pg_for_principal(session, principal_id=int(linked.id))
-
-    api_key = decrypt_secret(getattr(profile, "pg_api_key_enc", None))
-    if api_key:
-        client = PasarGuardClient(
-            username=profile.pg_admin_username,
-            api_key=api_key,
-        )
-        api_key = ""
-        return await _authenticate_and_cache(_pg_reseller_cache, cache_key, client)
-
-    password = decrypt_secret(profile.pg_admin_password_enc)
-    if not password:
-        raise PasarGuardError(
-            "اعتبارنامه پاسارگارد نماینده ذخیره نشده (کلید API یا رمز). "
-            "علت محتمل: راه‌اندازی ناقص یا کلید رمزنگاری تغییر کرده. "
-            "راه حل: ادمین اصلی از بخش نمایندگان کلید API یا رمز را ثبت/بازنشانی کند."
-        )
-    client = PasarGuardClient(
-        username=profile.pg_admin_username,
-        password=password,
-    )
-    password = ""
-    return await _authenticate_and_cache(_pg_reseller_cache, cache_key, client)
+    """Fail closed for shops without isolated S-UI credentials."""
+    raise PasarGuardError("این عملیات به اعتبارنامهٔ مستقل فروشگاه نیاز دارد", 403)
 
 
 async def get_pg_for_staff(
     session, *, pg_username: str | None = None, staff_id: int | None = None
 ) -> PasarGuardClient:
-    """PasarGuard client for a pg_staff row — never owner token (Phase C5 / 1F).
-
-    Requires encrypted API key or password on ``PgStaffAccess``.
-    Priority: API key → password.
-    Cache key is ``(staff_id, username)`` so sibling principals never share a
-    client even if usernames collide after re-grant.
-    """
-    if is_sui_backend():
-        raise PasarGuardError(
-            "ورود ادمین فرعی با S-UI در این نسخه فعال نیست؛ از حساب مالک اصلی استفاده کنید",
-            501,
-        )
-
-    from sqlalchemy import select
-
-    from app.db.models import PgStaffAccess
-    from app.services.secret_box import decrypt_secret
-
-    row: PgStaffAccess | None = None
-    if staff_id is not None:
-        row = await session.get(PgStaffAccess, int(staff_id))
-    elif pg_username:
-        from sqlalchemy import func
-
-        uname = str(pg_username).strip().lower()
-        row = (
-            await session.execute(
-                select(PgStaffAccess).where(
-                    func.lower(PgStaffAccess.pg_username) == uname
-                )
-            )
-        ).scalar_one_or_none()
-    if not row or not row.is_active:
-        raise PasarGuardError(
-            "دسترسی ادمین پاسارگارد فعال نیست. "
-            "علت محتمل: حساب غیرفعال شده یا ردیف دسترسی حذف شده. "
-            "راه حل: ادمین اصلی از «ادمین‌ها» وضعیت را بررسی و در صورت نیاز دوباره اعطا کند."
-        )
-    uname = (row.pg_username or "").strip().lower()
-    sid = int(row.id)
-    cache_key = (sid, uname)
-    cached = _pg_staff_cache.get(cache_key)
-    if _cached_client_ready(cached):
-        return cached
-    api_key = decrypt_secret(getattr(row, "pg_api_key_enc", None))
-    if api_key:
-        client = PasarGuardClient(username=row.pg_username, api_key=api_key)
-        api_key = ""
-        return await _authenticate_and_cache(_pg_staff_cache, cache_key, client)
-    password = decrypt_secret(row.pg_admin_password_enc)
-    if not password:
-        raise PasarGuardError(
-            "اعتبارنامه پاسارگارد برای این حساب ذخیره نشده (کلید API یا رمز). "
-            "علت محتمل: اعطای ناقص یا کلید رمزنگاری تغییر کرده. "
-            "راه حل: ادمین اصلی از «ادمین‌ها» کلید API یا رمز ادمین فرعی را ثبت کند."
-        )
-    client = PasarGuardClient(username=row.pg_username, password=password)
-    password = ""
-    return await _authenticate_and_cache(_pg_staff_cache, cache_key, client)
+    """Fail closed for staff without isolated S-UI credentials."""
+    raise PasarGuardError("اعتبارنامهٔ مستقل کارکنان در این نسخه پشتیبانی نمی‌شود", 403)
 
 
 async def get_pg_for_principal(
@@ -1465,121 +1332,26 @@ async def get_pg_for_principal(
     principal_id: int | None = None,
     pg_username: str | None = None,
 ) -> PasarGuardClient:
-    """PasarGuard client for a Level-1 or Level-2 OrgPrincipal — never Owner env token.
-
-    Requires ``OrgPrincipal.pg_username`` plus ``pg_api_key_enc`` or ``pg_password_enc``
-    on *this* row. Priority: API key → password.
-    Selector is ``principal_id`` only. ``pg_username`` is ignored and must not
-    choose a sibling/parent row.
-
-    Cache key is ``(principal_id, username)`` so parent/siblings never share clients.
-
-    Level-2 uses its own stored credential only. Missing identity, inactive parent,
-    or decrypt failure → fail closed. Never falls back to Owner env credentials,
-    parent Level-1 credentials, or sibling caches.
-    """
-    if is_sui_backend():
-        raise PasarGuardError(
-            "Principal های PasarGuard در حالت S-UI فعال نیستند؛ از حساب مالک اصلی استفاده کنید",
-            501,
-        )
-
-    from app.db.models import OrgPrincipal
-    from app.services.secret_box import decrypt_secret
-
-    _ = pg_username  # not a selector — principal_id is required
-    row: OrgPrincipal | None = None
-    if principal_id is not None:
-        try:
-            pid = int(principal_id)
-        except (TypeError, ValueError):
-            pid = 0
-        if pid > 0:
-            row = await session.get(OrgPrincipal, pid)
-    if row is None or str(row.status) != "active":
-        raise PasarGuardError(
-            "Principal فعال با هویت پاسارگارد یافت نشد. "
-            "علت محتمل: Principal حذف/غیرفعال شده. "
-            "راه حل: با ادمین اصلی تماس بگیرید."
-        )
-    try:
-        depth = int(row.depth)
-    except (TypeError, ValueError):
-        depth = -1
-    if depth not in (1, 2):
-        raise PasarGuardError(
-            "فقط Principal سطح ۱ یا ۲ می‌تواند کلاینت اختصاصی پاسارگارد داشته باشد"
-        )
-    if depth == 2:
-        parent_id = getattr(row, "parent_id", None)
-        if parent_id is None:
-            raise PasarGuardError(
-                "والد Principal سطح ۲ نامعتبر است — دسترسی رد شد"
-            )
-        parent = await session.get(OrgPrincipal, int(parent_id))
-        if (
-            parent is None
-            or str(parent.status) != "active"
-            or int(getattr(parent, "depth", -1) or -1) != 1
-        ):
-            raise PasarGuardError(
-                "والد Principal سطح ۲ غیرفعال است — دسترسی رد شد"
-            )
-    uname = (row.pg_username or "").strip()
-    if not uname:
-        raise PasarGuardError(
-            "هویت پاسارگارد برای این Principal تعریف نشده — دسترسی رد شد"
-        )
-    pid = int(row.id)
-    cache_key = (pid, uname.lower())
-    cached = _pg_principal_cache.get(cache_key)
-    if _cached_client_ready(cached):
-        return cached
-    api_key = decrypt_secret(getattr(row, "pg_api_key_enc", None))
-    if api_key:
-        client = PasarGuardClient(username=uname, api_key=api_key)
-        api_key = ""
-        return await _authenticate_and_cache(_pg_principal_cache, cache_key, client)
-    password = decrypt_secret(row.pg_password_enc)
-    if not password:
-        raise PasarGuardError(
-            "اعتبارنامه پاسارگارد Principal ذخیره نشده (کلید API یا رمز). "
-            "علت محتمل: provisioning ناقص یا کلید رمزنگاری تغییر کرده. "
-            "راه حل: ادمین اصلی کلید API یا رمز Principal را ثبت کند."
-        )
-    client = PasarGuardClient(username=uname, password=password)
-    # Local plaintext reference must not outlive token acquisition.
-    password = ""
-    return await _authenticate_and_cache(_pg_principal_cache, cache_key, client)
+    """Fail closed for principals without isolated S-UI credentials."""
+    raise PasarGuardError("اعتبارنامهٔ مستقل نماینده در این نسخه پشتیبانی نمی‌شود", 403)
 
 
 def public_pg_api_base() -> str:
-    """Best-known API root (may include a dashboard path). Prefer ``public_pg_sub_origin`` for /sub links."""
+    """Return the configured S-UI web base for compatibility callers."""
     client = _pg
     if client and client.base_url:
         return client.base_url.rstrip("/")
-    cands = pg_api_base_candidates(get_settings().pg_base_url or "")
-    return (cands[0] if cands else "").rstrip("/")
+    return normalize_http_base_url(get_settings().sui_base_url or "").rstrip("/")
 
 
 def public_pg_sub_origin() -> str:
-    """Scheme + host (+ port) of the PasarGuard panel — no dashboard/UI path.
-
-    When PG has no dedicated subscription host configured it often returns a
-    path-only ``/sub/…`` URL. Public links must still be absolute; use this
-    origin (not the panel path) as the fallback base.
-    """
+    """Return the public S-UI subscription origin used for relative links."""
     from urllib.parse import urlparse, urlunparse
 
-    from app.config import normalize_pg_base_url
-
-    raw = ""
-    client = _pg
-    if client and getattr(client, "base_url", None):
-        raw = str(client.base_url or "")
-    if not raw:
-        raw = get_settings().pg_base_url or ""
-    base = normalize_pg_base_url(raw)
+    settings = get_settings()
+    base = normalize_http_base_url(settings.sui_subscription_base_url or "")
+    if not base:
+        base = normalize_http_base_url(settings.sui_base_url or "")
     if not base:
         return ""
     parsed = urlparse(base)

@@ -1,6 +1,6 @@
 ﻿{% extends "base.html" %}
 {% from "macros.html" import switch, switch_chip, row_actions, page_title, table_select_head, table_select_cell, table_bulk_bar, modal_title %}
-{% block title %}گروه‌های پاسارگارد{% endblock %}
+{% block title %}گروه‌های S-UI{% endblock %}
 {% block content %}
 <div class="page-head">
   <div>
@@ -65,7 +65,7 @@
   <div class="ui-modal-backdrop" data-modal-close></div>
   <div class="ui-modal-panel" role="dialog" aria-modal="true">
     <div class="ui-modal-head">
-      {{ modal_title('groups', 'ساخت گروه', caption='گروه پاسارگارد جدید', tone='pg') }}
+      {{ modal_title('groups', 'ساخت گروه', caption='گروه S-UI جدید', tone='pg') }}
       <button type="button" class="icon-btn" data-modal-close aria-label="بستن"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <form method="post" action="/pg/groups" class="form-stack">
@@ -83,7 +83,7 @@
         </div>
       </div>
       <div class="actions">
-        <button class="btn" type="submit">ساخت در پاسارگارد</button>
+        <button class="btn" type="submit">ساخت در S-UI</button>
         <button type="button" class="btn btn-ghost" data-modal-close>انصراف</button>
       </div>
     </form>

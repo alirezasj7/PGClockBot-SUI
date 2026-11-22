@@ -279,7 +279,7 @@ async def pg_home_bundle(*, include_nodes: bool = True) -> tuple[dict[str, Any],
             if ver:
                 summary["version"] = str(ver)
     except Exception:
-        summary["error"] = "اتصال به پاسارگارد برقرار نشد"
+        summary["error"] = "اتصال به S-UI برقرار نشد"
         nodes_status["error"] = summary["error"]
         nodes_status["overall"] = "err"
     return summary, nodes_status
@@ -509,7 +509,7 @@ async def build_home_overview(
         log.exception("home pg_home_bundle failed: %s", pg_pair)
         out["pg_summary"] = {
             **_empty_pg_summary(),
-            "error": "اتصال به پاسارگارد برقرار نشد",
+            "error": "اتصال به S-UI برقرار نشد",
         }
         out["nodes"] = {**_empty_nodes(), "overall": "err", "error": out["pg_summary"]["error"]}
     elif isinstance(pg_pair, tuple) and len(pg_pair) == 2:

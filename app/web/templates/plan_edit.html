@@ -9,7 +9,7 @@
   <a class="btn btn-ghost" href="/plans">بازگشت</a>
 </div>
 
-{% if pg_error %}<div class="flash warn">پاسارگارد: {{ pg_error }}</div>{% endif %}
+{% if pg_error %}<div class="flash warn">S-UI: {{ pg_error }}</div>{% endif %}
 {% from "_pg_limit_cards.html" import pg_snapshot_limit_board %}
 {{ pg_snapshot_limit_board(pg_limit_cards) }}
 
@@ -52,30 +52,30 @@
       <input name="sort_order" type="number" value="{{ plan.sort_order }}" />
     </label>
 
-    <label class="form-field">حالت ساخت در پاسارگارد
+    <label class="form-field">حالت ساخت در S-UI
       <select name="mode" id="plan-mode">
         <option value="custom" {% if not plan.pg_template_id %}selected{% endif %}>سفارشی (گروه + حجم + مدت)</option>
-        <option value="template" {% if plan.pg_template_id %}selected{% endif %}>از تمپلیت آماده پاسارگارد</option>
+        <option value="template" {% if plan.pg_template_id %}selected{% endif %}>از تمپلیت آماده S-UI</option>
       </select>
     </label>
 
     {% set selected_groups = (plan.pg_group_ids or '').split(',') %}
     <div id="mode-custom" class="form-stack">
       <div class="form-field">
-        <span class="form-field-label">گروه‌های پاسارگارد (حداقل یکی)</span>
+        <span class="form-field-label">گروه‌های S-UI (حداقل یکی)</span>
         <div class="ui-switch-grid">
           {% for g in groups %}
           {% set gid = g.get('id')|string %}
           {{ switch_chip('group_' ~ g.get('id'), g.get('name') or g.get('id'), checked=(gid in selected_groups), value=g.get('id')) }}
           {% else %}
-          <span class="muted">گروهی نیست — از منوی پاسارگارد → گروه‌ها بسازید.</span>
+          <span class="muted">گروهی نیست — از منوی S-UI → گروه‌ها بسازید.</span>
           {% endfor %}
         </div>
       </div>
     </div>
 
     <div id="mode-template" class="form-stack" style="display:none">
-      <label class="form-field">تمپلیت پاسارگارد
+      <label class="form-field">تمپلیت S-UI
         <select name="pg_template_id">
           <option value="">— انتخاب کنید —</option>
           {% for t in templates %}

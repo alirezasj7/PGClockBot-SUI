@@ -48,7 +48,7 @@
 {% set _ = tiles.append({'name': 'ربات تلگرام', 'detail': bot_detail, 'state': bot_state, 'icon': 'bot', 'href': '/shop-settings?tab=bot'}) %}
 {% set pg_state = 'neutral' if (pg_health and pg_health.unchecked) else ('ok' if (pg_health and pg_health.ok) else 'err') %}
 {% set pg_detail = 'بررسی نشده' if (pg_health and pg_health.unchecked) else (('نسخه ' ~ pg_health.version) if (pg_health and pg_health.ok and pg_health.version) else ('آنلاین' if (pg_health and pg_health.ok) else ((pg_health.error if pg_health else none) or 'قطع'))) %}
-{% set _ = tiles.append({'name': 'پاسارگارد', 'detail': pg_detail, 'state': pg_state, 'icon': 'pg', 'href': '/pg'}) %}
+{% set _ = tiles.append({'name': 'S-UI', 'detail': pg_detail, 'state': pg_state, 'icon': 'pg', 'href': '/pg'}) %}
 {{ status_tiles(tiles) }}
 
 {% set portal_bot_show = ('dashboard' in (staff.get('permissions') or []) or staff.role == 'reseller') %}

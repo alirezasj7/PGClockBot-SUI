@@ -317,7 +317,7 @@
 {# PasarGuard sub-nav — live pg_permissions only (never web is_admin) #}
 {% macro pg_tabs(active='') -%}
 {% set perms = pg_perms if pg_perms is defined else (staff.get('pg_permissions') if staff is defined else []) %}
-<nav class="section-tabs pg-tabs" aria-label="بخش‌های پاسارگارد">
+<nav class="section-tabs pg-tabs" aria-label="بخش‌های S-UI">
   {% if 'pg_overview' in perms %}
   <a href="/pg" class="{% if active=='pg' %}active{% endif %}">نمای کلی</a>
   {% endif %}

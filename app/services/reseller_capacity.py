@@ -143,9 +143,9 @@ def _admin_data_limit(admin: dict) -> int:
     return 0
 
 
-EXTRA_FAILED_REFUNDED = "افزایش ظرفیت در پاسارگارد ناموفق بود — مبلغ بازگردانده شد"
+EXTRA_FAILED_REFUNDED = "افزایش ظرفیت در S-UI ناموفق بود — مبلغ بازگردانده شد"
 EXTRA_OUTCOME_UNKNOWN = (
-    "پاسخ پاسارگارد برای افزایش ظرفیت نرسید. خرید ثبت شده و ظرفیت با تمدید بعدی یا بررسی پشتیبانی اعمال می‌شود؛ "
+    "پاسخ S-UI برای افزایش ظرفیت نرسید. خرید ثبت شده و ظرفیت با تمدید بعدی یا بررسی پشتیبانی اعمال می‌شود؛ "
     "دوباره خرید نکنید."
 )
 
@@ -211,7 +211,7 @@ async def _apply_paid_extra(
         raise ValueError(EXTRA_FAILED_REFUNDED) from exc
     if not isinstance(admin, dict) or not admin:
         await _refund_extra(session, user, purchase)
-        raise ValueError("ادمین پاسارگارد یافت نشد — مبلغ بازگردانده شد")
+        raise ValueError("ادمین S-UI یافت نشد — مبلغ بازگردانده شد")
     try:
         return await apply(pg, admin)
     except Exception as exc:
@@ -247,7 +247,7 @@ async def buy_extra_gb(
 
     uname = (profile.pg_admin_username or "").strip()
     if not uname:
-        raise ValueError("ادمین پاسارگارد برای این نماینده تنظیم نشده است")
+        raise ValueError("ادمین S-UI برای این نماینده تنظیم نشده است")
 
     total = price * gb_n
     # Before the charge and the panel call; the parent stays locked until this purchase commits.
@@ -289,7 +289,7 @@ async def buy_extra_users(
 
     uname = (profile.pg_admin_username or "").strip()
     if not uname:
-        raise ValueError("ادمین پاسارگارد برای این نماینده تنظیم نشده است")
+        raise ValueError("ادمین S-UI برای این نماینده تنظیم نشده است")
 
     total = price * n
     purchase = _ExtraPurchase(uname=uname, amount=total, gb=0, users=n, reason=f"reseller_extra_users:{n}:{uname}")

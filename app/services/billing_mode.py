@@ -68,14 +68,14 @@ async def read_admin_traffic_bytes(pg_username: str) -> int:
 
     gate, admin = await get_pg().get_admin_gate(pg_username)
     if gate == "missing":
-        raise BillingModeChangeError("ادمین پاسارگارد این نماینده در پنل پیدا نشد")
+        raise BillingModeChangeError("ادمین S-UI این نماینده در پنل پیدا نشد")
     if not isinstance(admin, dict):
         raise BillingModeChangeError(
-            "پاسارگارد پاسخ نداد؛ برای تنظیم نقطهٔ شروع مصرف PAYG کمی بعد دوباره تلاش کنید"
+            "S-UI پاسخ نداد؛ برای تنظیم نقطهٔ شروع مصرف PAYG کمی بعد دوباره تلاش کنید"
         )
     used = get_traffic_source().extract_bytes(admin)
     if used is None:
-        raise BillingModeChangeError("مصرف ترافیک این ادمین از پاسارگارد خوانده نشد")
+        raise BillingModeChangeError("مصرف ترافیک این ادمین از S-UI خوانده نشد")
     return used
 
 

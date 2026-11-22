@@ -23,7 +23,7 @@ RETIRED_TEXT_DEFAULTS: dict[str, tuple[str, ...]] = {
     "screen_title_a_users": ("👥 کاربران بات",),
     "screen_caption_a_home": ("یک گروه را از دکمه‌های زیر انتخاب کنید.",),
     "screen_caption_a_people": ("کاربران و نمایندگان.",),
-    "screen_caption_a_product": ("پلن‌ها و عملیات پاسارگارد.",),
+    "screen_caption_a_product": ("پلن‌ها و عملیات S-UI.",),
     "screen_caption_a_system": ("تنظیمات، بکاپ و پیش‌نمایش.",),
     "screen_caption_a_settings": (
         (

@@ -48,7 +48,7 @@ GATEWAY_RETRY_STATUSES = frozenset({502, 503, 504})
 GATEWAY_RETRY_DELAY_RANGE_SEC = (0.2, 0.6)
 _jitter = secrets.SystemRandom()
 PG_READ_UNAVAILABLE_MESSAGE = (
-    "ارتباط با پاسارگارد کند یا قطع است؛ اطلاعات این بخش فعلاً در دسترس نیست. "
+    "ارتباط با S-UI کند یا قطع است؛ اطلاعات این بخش فعلاً در دسترس نیست. "
     "چند لحظه دیگر دوباره تلاش کنید."
 )
 

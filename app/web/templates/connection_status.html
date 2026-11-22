@@ -19,11 +19,11 @@
       <h2 id="test-user-title">کاربر تست</h2>
       <span class="badge {{ 'ok' if page.settings.has_account else 'neutral' }}">{{ 'تنظیم شده' if page.settings.has_account else 'تنظیم نشده' }}</span>
     </div>
-    <p class="muted">یک کاربر فعال در پاسارگارد انتخاب کنید که مال هیچ مشتری نباشد. لازم نیست حساب مالک باشد؛ فقط ربات باید به آن دسترسی داشته باشد.</p>
+    <p class="muted">یک کاربر فعال در S-UI انتخاب کنید که مال هیچ مشتری نباشد. لازم نیست حساب مالک باشد؛ فقط ربات باید به آن دسترسی داشته باشد.</p>
     <form method="post" action="/connection-status/account" class="form-stack"
           data-confirm="ثبت کاربر تست، تست‌های فعلی را متوقف و کانفیگ‌ها را از فهرست کاربران مخفی می‌کند. ادامه می‌دهید؟" data-confirm-title="ثبت کاربر تست" data-confirm-label="ثبت">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-      <label class="form-field" for="monitor-username">نام کاربری در پاسارگارد
+      <label class="form-field" for="monitor-username">نام کاربری در S-UI
         <input id="monitor-username" name="username" dir="ltr" minlength="3" maxlength="128" required autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
                data-focus-guard data-lpignore="true" data-1p-ignore value="{{ page.settings.username or '' }}" placeholder="MattDev" aria-describedby="monitor-account-help">
         <small class="muted" id="monitor-account-help">فقط نام کاربری را بنویسید؛ رمز عبور، توکن یا لینک اشتراک وارد نکنید.</small>

@@ -245,7 +245,7 @@ def capacity_signal(shop_id: int, percent: float | None, threshold: float) -> Si
     else:
         return None
     text = (
-        f"⚠️ ظرفیت پنل پاسارگارد فروشگاه نزدیک پر شدن است ({percent or 0:.0f}٪ از سقف).\n"
+        f"⚠️ ظرفیت پنل S-UI فروشگاه نزدیک پر شدن است ({percent or 0:.0f}٪ از سقف).\n"
         "از وب‌پنل ← خانه وضعیت سهمیه را بررسی کنید."
     )
     return Signal(shop_id=shop_id, alert=ALERT_CAPACITY, notify_key=KEY_CAPACITY, count=count, text=text, path="/home")

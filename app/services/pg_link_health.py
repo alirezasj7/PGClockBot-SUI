@@ -30,7 +30,7 @@ KIND_LABELS = {
     "dns": "خطای DNS",
     "dropped": "اتصال وسط کار قطع شد",
     "gateway": "خطای پراکسی (502/503/504)",
-    "server_error": "خطای خود پاسارگارد (5xx)",
+    "server_error": "خطای خود S-UI (5xx)",
 }
 _DNS_HINTS = ("name or service not known", "temporary failure in name resolution", "getaddrinfo", "nodename nor servname")
 

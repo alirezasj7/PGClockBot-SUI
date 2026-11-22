@@ -902,7 +902,7 @@ DEFAULT_SETTINGS = {
     "btn_menu_home": "🏠 منوی اصلی",
     "btn_adm_hub_ops": "🗓 عملیات روزانه",
     "btn_adm_hub_people": "👤 افراد",
-    "btn_adm_hub_product": "📦 محصول و پاسارگارد",
+    "btn_adm_hub_product": "📦 محصول و S-UI",
     "btn_adm_hub_marketing": "🎯 بازاریابی",
     "btn_adm_hub_system": "🛠 سیستم",
     "btn_adm_edit_mode": "✏️ حالت ویرایش منوها",
@@ -1005,7 +1005,7 @@ DEFAULT_SETTINGS = {
     "btn_adm_payments": "🧾 رسیدها",
     "btn_adm_tickets": "🎫 تیکت‌ها",
     "btn_adm_plans": "📦 پلن‌ها",
-    "btn_adm_pg": "🖥 پاسارگارد",
+    "btn_adm_pg": "🖥 S-UI",
     "btn_adm_users": "👥 کاربران",
     "btn_adm_resellers": "🤝 نمایندگان",
     "btn_adm_loyalty": "⭐ باشگاه مشتریان",
@@ -1394,7 +1394,7 @@ SETTING_GROUPS = {
         ("btn_menu_home", "دکمه منوی اصلی (کیبورد)", "text", "خروج از پیش‌نمایش / خانه"),
         ("btn_adm_hub_ops", "گروه عملیات روزانه (ادمین)", "text", "هاب پنل ادمین"),
         ("btn_adm_hub_people", "گروه افراد (ادمین)", "text", "هاب پنل ادمین"),
-        ("btn_adm_hub_product", "گروه محصول و پاسارگارد (ادمین)", "text", "هاب پنل ادمین"),
+        ("btn_adm_hub_product", "گروه محصول و S-UI (ادمین)", "text", "هاب پنل ادمین"),
         ("btn_adm_hub_marketing", "گروه بازاریابی (ادمین)", "text", "هاب پنل ادمین"),
         ("btn_adm_hub_system", "گروه سیستم (ادمین)", "text", "هاب پنل ادمین"),
         ("btn_adm_edit_mode", "دکمه حالت ویرایش منوها", "text", "هاب پنل ادمین"),
@@ -1404,7 +1404,7 @@ SETTING_GROUPS = {
         ("btn_adm_payments", "دکمه رسیدها (ادمین)", "text", "هاب عملیات"),
         ("btn_adm_tickets", "دکمه تیکت‌ها (ادمین)", "text", "هاب عملیات"),
         ("btn_adm_plans", "دکمه پلن‌ها (ادمین)", "text", "هاب محصول"),
-        ("btn_adm_pg", "دکمه پاسارگارد (ادمین)", "text", "هاب محصول"),
+        ("btn_adm_pg", "دکمه S-UI (ادمین)", "text", "هاب محصول"),
         ("btn_adm_users", "دکمه کاربران (ادمین)", "text", "هاب افراد"),
         ("btn_adm_resellers", "دکمه نمایندگان (ادمین)", "text", "هاب افراد"),
         ("btn_adm_loyalty", "دکمه باشگاه (ادمین)", "text", "هاب بازاریابی"),
@@ -1817,7 +1817,7 @@ SETTING_GROUPS = {
         ("btn_pay_wallet", "پرداخت با کیف پول", "text", ""),
         ("btn_pay_discount", "کد تخفیف", "text", ""),
     ],
-    "نام‌گذاری سرویس در پاسارگارد": [
+    "نام‌گذاری سرویس در S-UI": [
         ("pg_username_prefix", "پیشوند ثابت", "text", "مثلاً clk — اول نام کاربر ساخته‌شده"),
         ("pg_username_suffix", "پسوند ثابت", "text", "اختیاری — ته نام"),
         (
@@ -1874,7 +1874,7 @@ SETTING_GROUPS = {
         ),
         (
             "service_import_admins",
-            "ادمین‌های مجاز پاسارگارد",
+            "ادمین‌های مجاز S-UI",
             "list",
             "ادمینی که ربات با آن وارد پنل می‌شود همیشه مجاز است. اگر بعضی سرویس‌ها را با ادمین دیگری ساخته‌اید، نام کاربری او را اینجا بنویسید. ادمین نمایندگان قابل افزودن نیست.",
         ),
@@ -1989,7 +1989,7 @@ TAB_SETTING_GROUPS: dict[str, list[str]] = {
     ],
     "supports": ["متن پشتیبانی ربات"],
     "loyalty": ["متن دعوت دوستان"],
-    "naming": ["نام‌گذاری سرویس در پاسارگارد"],
+    "naming": ["نام‌گذاری سرویس در S-UI"],
     "limits": [
         "معرف اجباری",
         "شماره تماس خرید",

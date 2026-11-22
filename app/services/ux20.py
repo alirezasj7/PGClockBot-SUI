@@ -144,7 +144,7 @@ async def check_pg_connection(*, reseller_user_id: int | None = None, session: A
     except Exception:
         return {
             "ok": False,
-            "error": "اتصال به پاسارگارد برقرار نشد",
+            "error": "اتصال به S-UI برقرار نشد",
             "version": None,
             "base_url": None,
         }

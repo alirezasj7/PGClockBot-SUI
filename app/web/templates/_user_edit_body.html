@@ -149,11 +149,11 @@
 <section class="edit-section">
   <header class="edit-section-head">
     <h3>اختصاص پلن جدید</h3>
-    <p class="muted">ساخت سرویس پاسارگارد و لینک اشتراک — بدون سفارش و پرداخت</p>
+    <p class="muted">ساخت سرویس S-UI و لینک اشتراک — بدون سفارش و پرداخت</p>
   </header>
   {% if plans %}
   <form method="post" action="/users/{{ user.id }}/services" class="form-stack"
-        data-confirm="پلن انتخابی برای این کاربر فعال شود؟ کاربر پاسارگارد جدید ساخته می‌شود."
+        data-confirm="پلن انتخابی برای این کاربر فعال شود؟ کاربر S-UI جدید ساخته می‌شود."
         data-confirm-title="تأیید اختصاص پلن"
         data-confirm-label="اختصاص پلن">
     <div class="user-edit-inline-row">
@@ -255,7 +255,7 @@
         {% if s.service.remark in ['linked', 'imported'] %}
         {# Added from outside the bot: detaching is the safe default; removing the panel account is a separate, explicit choice. #}
         <form method="post" action="/users/{{ user.id }}/services/{{ s.service.id }}/delete" class="form-stack"
-              data-confirm="سرویس #{{ s.service.id }}{% if s.service.pg_username %} ({{ s.service.pg_username }}){% endif %} فقط از لیست مشتری جدا شود؟ حساب VPN در پاسارگارد حفظ می‌شود و مشتری دیگر آن را در ربات نمی‌بیند."
+              data-confirm="سرویس #{{ s.service.id }}{% if s.service.pg_username %} ({{ s.service.pg_username }}){% endif %} فقط از لیست مشتری جدا شود؟ حساب VPN در S-UI حفظ می‌شود و مشتری دیگر آن را در ربات نمی‌بیند."
               data-confirm-title="جدا کردن سرویس از مشتری"
               data-confirm-label="جدا شود">
           <div class="actions user-edit-actions">
@@ -263,18 +263,18 @@
           </div>
         </form>
         <form method="post" action="/users/{{ user.id }}/services/{{ s.service.id }}/delete" class="form-stack"
-              data-confirm="سرویس #{{ s.service.id }}{% if s.service.pg_username %} ({{ s.service.pg_username }}){% endif %} از بیرون ربات اضافه شده است. حساب VPN آن در پاسارگارد هم برای همیشه حذف شود؟ این عمل برگشت‌ناپذیر است."
-              data-confirm-title="حذف همراه حساب پاسارگارد"
+              data-confirm="سرویس #{{ s.service.id }}{% if s.service.pg_username %} ({{ s.service.pg_username }}){% endif %} از بیرون ربات اضافه شده است. حساب VPN آن در S-UI هم برای همیشه حذف شود؟ این عمل برگشت‌ناپذیر است."
+              data-confirm-title="حذف همراه حساب S-UI"
               data-confirm-danger="1"
-              data-confirm-label="حذف با حساب پاسارگارد">
+              data-confirm-label="حذف با حساب S-UI">
           <input type="hidden" name="delete_pg" value="1" />
           <div class="actions user-edit-actions">
-            <button class="btn btn-sm btn-danger" type="submit">حذف همراه حساب پاسارگارد</button>
+            <button class="btn btn-sm btn-danger" type="submit">حذف همراه حساب S-UI</button>
           </div>
         </form>
         {% else %}
         <form method="post" action="/users/{{ user.id }}/services/{{ s.service.id }}/delete" class="form-stack"
-              data-confirm="سرویس #{{ s.service.id }}{% if s.service.pg_username %} ({{ s.service.pg_username }}){% endif %} و کاربر پاسارگارد مرتبط برای همیشه حذف شوند؟ این عمل برگشت‌ناپذیر است."
+              data-confirm="سرویس #{{ s.service.id }}{% if s.service.pg_username %} ({{ s.service.pg_username }}){% endif %} و کاربر S-UI مرتبط برای همیشه حذف شوند؟ این عمل برگشت‌ناپذیر است."
               data-confirm-title="تأیید حذف سرویس"
               data-confirm-danger="1"
               data-confirm-label="حذف سرویس">

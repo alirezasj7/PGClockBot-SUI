@@ -337,7 +337,7 @@ async def build_reseller_pg_overview(
         "user_stats": None,
     }
     if not owner:
-        out["error"] = "ادمین پاسارگارد برای این حساب تنظیم نشده است"
+        out["error"] = "ادمین S-UI برای این حساب تنظیم نشده است"
         return out
 
     try:
@@ -378,8 +378,8 @@ async def build_reseller_pg_overview(
                 admin = None
         if not isinstance(admin, dict):
             out["error"] = PG_READ_UNAVAILABLE_MESSAGE if panel_unreachable else (
-                "حساب پاسارگارد خوانده نشد. "
-                "اگر ورود پنل پاسارگارد با همین یوزر موفق است، نقش را برای خواندن حساب خودتان بررسی کنید."
+                "حساب S-UI خوانده نشد. "
+                "اگر ورود پنل S-UI با همین یوزر موفق است، نقش را برای خواندن حساب خودتان بررسی کنید."
             )
             return out
 

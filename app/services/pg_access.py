@@ -17,7 +17,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Our panel feature keys (shown in sidebar under «پاسارگارد»)
+# Our panel feature keys (shown in sidebar under «S-UI»)
 PG_FEATURE_KEYS = (
     "pg_overview",
     "pg_users",
@@ -179,176 +179,23 @@ async def resolve_platform_pg_capabilities(
     base_url: str | None = None,
     use_cache: bool = True,
 ) -> dict[str, Any]:
-    """Resolve PG menu/action ACL for platform env credentials (Hybrid Owner).
-
-    Fail-closed: any probe/role failure → empty features (no PG UI).
-    Does not elevate beyond the token of the given / env credentials.
-    Auth: API key (X-Api-Key) preferred over password when either is provided.
-    """
+    """Describe S-UI capabilities for an authenticated platform owner."""
     from app.config import get_settings
-    from app.services.pasarguard import PasarGuardClient, PasarGuardError, new_panel_http_client
+    from app.services.pasarguard import get_pg
 
-    settings = get_settings()
-    env_username = getattr(settings, "pg_username", None)
-    env_password = getattr(settings, "pg_password", None)
-    env_api_key = getattr(settings, "pg_api_key", None)
-    env_base_url = getattr(settings, "pg_base_url", None)
-    uname = (username if username is not None else env_username or "").strip()
-    pwd = (password if password is not None else (env_password or "")).replace(
-        "\r", ""
-    ).strip()
-    key = (api_key if api_key is not None else (env_api_key or "")).replace(
-        "\r", ""
-    ).strip()
-    # base_url override only for setup probe (temporary client)
-    cache_key = f"{(base_url or env_base_url or '').rstrip('/')}|{uname.lower()}"
-    now = time.monotonic()
-    if (
-        use_cache
-        and username is None
-        and password is None
-        and api_key is None
-        and base_url is None
-    ):
-        hit = _PLATFORM_CAPS_CACHE.get(cache_key)
-        if hit and (now - hit[0]) < _PLATFORM_CAPS_TTL:
-            return dict(hit[1])
-
-    empty: dict[str, Any] = {
-        "ok": False,
-        "error": None,
-        "username": uname or None,
-        "pg_is_owner": False,
+    legacy_override = any(value is not None for value in (username, password, api_key, base_url))
+    client = get_pg()
+    ready = not legacy_override and client.is_auth_ready
+    return {
+        "ok": ready,
+        "error": None if ready else "آدرس و توکن S-UI را تنظیم کنید.",
+        "username": get_settings().sui_admin_username if ready else None,
+        "pg_is_owner": ready,
         "pg_role_id": None,
-        "features": [],
-        "role": None,
-        "admin": None,
+        "features": ["pg_overview", "pg_users", "pg_inbounds"] if ready else [],
+        "role": {"is_owner": True} if ready else None,
+        "admin": await client.get_current_admin() if ready else None,
     }
-    if not uname or not (pwd or key):
-        empty["error"] = "اعتبارنامه پاسارگارد ناقص است (نام کاربری + رمز یا کلید API)"
-        return empty
-
-    client: PasarGuardClient | None = None
-    own_client = bool(
-        username is not None
-        or password is not None
-        or api_key is not None
-        or base_url is not None
-    )
-    try:
-        if own_client:
-            # Temporary client for setup probe — do not touch global get_pg() singleton.
-            # Prefer API key when provided; otherwise password grant.
-            client = PasarGuardClient(
-                username=uname,
-                password=pwd or None,
-                api_key=key or None,
-            )
-            if base_url:
-                try:
-                    client.base_url = assert_safe_pg_base_url(str(base_url).rstrip("/"), resolve_dns=False)
-                except UnsafePgUrlError as exc:
-                    empty["error"] = str(exc)
-                    return empty
-                # Rebind the temporary client to the probed base before any request.
-                old = client._client
-                client._client = new_panel_http_client(client.base_url)
-                try:
-                    await old.aclose()
-                except Exception:
-                    logger.debug("resolve_platform_pg_capabilities: ignored failure", exc_info=True)
-        else:
-            from app.services.pasarguard import get_pg
-
-            client = get_pg()
-
-        await client.ensure_token()
-        # Token success already proves the account exists. Directory lookup
-        # (GET /api/admins, /api/admin/{id}) often 403s for roles that only
-        # have users.create — use GET /api/admin (self) first, then directory,
-        # then a username stub so setup never treats a valid login as
-        # "admin not found / wrong password".
-        admin: dict | None = None
-        try:
-            current = await client.get_current_admin()
-            if isinstance(current, dict) and current:
-                admin = current
-                got = str(current.get("username") or "").strip()
-                if got:
-                    uname = got
-        except Exception:
-            admin = None
-        if not isinstance(admin, dict):
-            admin = await client.get_admin(uname)
-        if not isinstance(admin, dict):
-            admin = {"username": uname}
-
-        role_id = None
-        nested_role = admin.get("role")
-        if isinstance(nested_role, dict) and nested_role.get("id") is not None:
-            try:
-                role_id = int(nested_role["id"])
-            except (TypeError, ValueError):
-                role_id = None
-        if role_id is None:
-            for key in ("role_id", "admin_role_id"):
-                if admin.get(key) is not None:
-                    try:
-                        role_id = int(admin[key])
-                        break
-                    except (TypeError, ValueError):
-                        pass
-
-        features, role, pg_is_owner = acl_from_admin_payload(admin)
-        # Nested role on GET /api/admin is live (same source as quotas).
-        # GET /admin-roles/{id} is a fallback only — it was cached separately
-        # and kept revoked node/host menus visible after PasarGuard edits.
-        if not _role_is_present(role) and role_id is not None:
-            features, role = await resolve_reseller_pg_features(
-                role_id, client=client
-            )
-            pg_is_owner = _admin_looks_like_pg_owner(admin, role)
-            if pg_is_owner:
-                features = full_pg_owner_features()
-                if not role:
-                    role = {"is_owner": True, "permissions": {}}
-                else:
-                    role = dict(role)
-                    role["is_owner"] = True
-            elif role:
-                features = map_pg_role_to_features(role)
-
-        payload = {
-            "ok": True,
-            "error": None,
-            "username": uname,
-            "pg_is_owner": pg_is_owner,
-            "pg_role_id": role_id,
-            "features": list(features or []),
-            "role": role,
-            "admin": admin,
-        }
-        if use_cache and not own_client:
-            _PLATFORM_CAPS_CACHE[cache_key] = (now, dict(payload))
-        return payload
-    except PasarGuardError as e:
-        empty["error"] = e.user_message(fallback=str(e))
-        if use_cache and not own_client:
-            _PLATFORM_CAPS_CACHE[cache_key] = (now, dict(empty))
-        return empty
-    except Exception as e:
-        # Transport errors carry internal hosts and ports; show a mapped Persian cause only.
-        logger.warning("PasarGuard capability probe failed", exc_info=True)
-        empty["error"] = user_safe_error(e, fallback="خطا در خواندن نقش پاسارگارد")
-        if use_cache and not own_client:
-            _PLATFORM_CAPS_CACHE[cache_key] = (now, dict(empty))
-        return empty
-    finally:
-        if own_client and client is not None:
-            try:
-                await client.close()
-            except Exception:
-                logger.debug("resolve_platform_pg_capabilities: ignored failure", exc_info=True)
 
 
 async def enrich_platform_admin_staff(user: dict) -> dict:
@@ -363,7 +210,7 @@ async def enrich_platform_admin_staff(user: dict) -> dict:
         out = enrich_staff_pg_from_role(dict(user), [], None)
         out["pg_is_owner"] = False
         out["pg_capabilities_ok"] = False
-        out["pg_capabilities_error"] = "بررسی دسترسی پاسارگارد ناموفق"
+        out["pg_capabilities_error"] = "بررسی دسترسی S-UI ناموفق"
         return out
     features = list(caps.get("features") or [])
     role = caps.get("role") if isinstance(caps.get("role"), dict) else None
@@ -377,7 +224,7 @@ async def enrich_platform_admin_staff(user: dict) -> dict:
         out["pg_role_id"] = caps["pg_role_id"]
     # Owner-equivalent: ensure action matrices are fully open
     if out.get("pg_is_owner"):
-        out["pg_permissions"] = full_pg_owner_features()
+        out["pg_permissions"] = features
         out["pg_actions"] = map_pg_role_actions({"is_owner": True})
         out["pg_user_actions"] = role_user_actions({"is_owner": True})
         out["pg_writes"] = map_pg_role_writes({"is_owner": True})
@@ -587,7 +434,6 @@ def staff_from_platform_caps(caps: Mapping[str, Any] | None) -> dict[str, Any]:
     features = list(caps.get("features") or [])
     pg_is_owner = bool(caps.get("pg_is_owner"))
     if pg_is_owner:
-        features = full_pg_owner_features()
         role = dict(role or {})
         role["is_owner"] = True
     staff = enrich_staff_pg_from_role(
@@ -612,7 +458,7 @@ def public_pg_access_audit(caps: Mapping[str, Any] | None) -> dict[str, Any]:
     username = caps.get("username")
     empty: dict[str, Any] = {
         "ok": False,
-        "error": caps.get("error") or "بررسی دسترسی پاسارگارد ناموفق بود",
+        "error": caps.get("error") or "بررسی دسترسی S-UI ناموفق بود",
         "pg_is_owner": False,
         "username": username,
         "role_name": None,
@@ -644,7 +490,7 @@ def public_pg_access_audit(caps: Mapping[str, Any] | None) -> dict[str, Any]:
     ]
     limits_rows: list[dict[str, str]] = []
     if pg_is_owner:
-        limits_rows.append({"label": "سقف نقش", "value": "بدون محدودیت (مالک پاسارگارد)"})
+        limits_rows.append({"label": "سقف نقش", "value": "بدون محدودیت (مالک S-UI)"})
     else:
         merged = merge_role_limits(admin, role)
 
@@ -691,7 +537,7 @@ def public_pg_access_audit(caps: Mapping[str, Any] | None) -> dict[str, Any]:
         "username": username,
         "role_name": role_name,
         "account_label": (
-            "مالک کامل پاسارگارد" if pg_is_owner else "حساب محدود پاسارگارد"
+            "مالک کامل S-UI" if pg_is_owner else "حساب محدود S-UI"
         ),
         "features": features,
         "can_create_admin": can_create,

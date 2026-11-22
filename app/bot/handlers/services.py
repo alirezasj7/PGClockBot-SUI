@@ -498,6 +498,14 @@ async def svc_link(callback: CallbackQuery, session: AsyncSession, db_user: BotU
         parts.append(copyable(url))
     elif not url:
         parts.append("لینک موجود نیست.")
+    if svc.pg_username:
+        try:
+            links = await get_pg().direct_links(svc.pg_username)
+        except Exception:
+            links = []
+        if links:
+            from app.services.formatting import copyable
+            parts.append("📡 کانفیگ مستقیم\n" + "\n\n".join(copyable(link) for link in links))
     sub_info.setdefault("username", svc.pg_username)
     parts.append(service_card(sub_info))
     text = format_message("📱 اشتراک", "\n\n".join(parts))

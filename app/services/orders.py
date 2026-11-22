@@ -763,7 +763,7 @@ async def create_custom_order(
         name_pattern = own_map.get("custom_plan_username_pattern") or None
         if not tpl_id and not group_ids:
             raise ValueError(
-                "برای پلن دلخواه، تمپلیت یا گروه پاسارگارد اختصاصی فروشگاه را در تنظیمات مشخص کنید"
+                "برای پلن دلخواه، تمپلیت یا گروه S-UI اختصاصی فروشگاه را در تنظیمات مشخص کنید"
             )
     elif not tpl_id and not parse_group_ids(group_ids):
         # Delivery needs a template or groups; refuse before payment, not after it.
@@ -2257,10 +2257,7 @@ async def deliver_order(
         group_ids = None
         if not plan.pg_template_id:
             group_ids = parse_group_ids(getattr(plan, "pg_group_ids", None))
-            if not group_ids:
-                raise ValueError(
-                    "هیچ گروهی برای ساخت کاربر انتخاب نشده — در وب‌پنل برای پلن، گروه پاسارگارد را انتخاب کنید"
-                )
+            # The platform S-UI client resolves default inbounds when the plan has none.
 
         volume_hold = await _hold_delivery_volume(session, order, plan, pg, data_limit=data_limit, quantity=qty)
         created_pg_ids: list[int] = []
@@ -2318,7 +2315,7 @@ async def deliver_order(
                     )
                 await pg.set_owner_by_id(int(pg_uid), owner_name)
             elif order.reseller_id and not pg_uid:
-                raise ValueError("ساخت کاربر پاسارگارد شناسه برنگرداند — تحویل لغو شد")
+                raise ValueError("ساخت کاربر S-UI شناسه برنگرداند — تحویل لغو شد")
 
             sub_url = user_subscription_url(pg_user if isinstance(pg_user, dict) else None)
             service = UserService(
@@ -2783,7 +2780,7 @@ async def apply_renewal(
             pg_user = await _write_renewal_target(session, order, pg, service, run, payload)
         else:
             pg_user = await _write_legacy_renewal(pg, service, plan, data_limit=data_limit, expire=expire)
-            if reset_traffic:
+            if reset_traffic and getattr(pg, "backend_kind", "") != "sui":
                 await pg.reset_user_by_id(service.pg_user_id)
         _record_renewed_service(service, plan, pg_user, run, data_limit=data_limit, expire=expire)
         order.status = OrderStatus.DELIVERED.value

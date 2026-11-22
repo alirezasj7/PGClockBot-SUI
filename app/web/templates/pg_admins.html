@@ -84,7 +84,7 @@
             </span>
             <span class="mono" dir="ltr">{{ st.get('web_username') }}</span>
             {% if st.get('credentials_ready') %}
-            <span class="badge approved">اعتبارنامه پاسارگارد ذخیره‌شده</span>
+            <span class="badge approved">اعتبارنامه S-UI ذخیره‌شده</span>
             {% if st.get('api_key_ready') %}
             <span class="badge approved">کلید API</span>
             {% endif %}
@@ -124,7 +124,7 @@
               </button>
             </form>
             <form method="post" action="/pg/admins/{{ uname }}/web-access/revoke"
-              data-confirm="دسترسی وب ادمین فرعی حذف شود؟ ادمین پاسارگارد باقی می‌ماند." data-confirm-title="حذف دسترسی وب" data-confirm-danger="1" data-confirm-label="حذف دسترسی">
+              data-confirm="دسترسی وب ادمین فرعی حذف شود؟ ادمین S-UI باقی می‌ماند." data-confirm-title="حذف دسترسی وب" data-confirm-danger="1" data-confirm-label="حذف دسترسی">
               <button class="btn btn-sm btn-danger" type="submit">حذف دسترسی</button>
             </form>
             {% elif src == 'none' %}
@@ -136,13 +136,13 @@
             {% if uname %}
             <form method="post" action="/pg/admins/{{ uname }}/delete"
               {% if src == 'reseller' %}
-              data-confirm="ادمین پاسارگارد «{{ uname }}» و نمایندگی/ربات فروشگاه متصل هم حذف شوند؟ این عمل برگشت‌ناپذیر است. علت برای شخص حذف‌شده ارسال می‌شود."
+              data-confirm="ادمین S-UI «{{ uname }}» و نمایندگی/ربات فروشگاه متصل هم حذف شوند؟ این عمل برگشت‌ناپذیر است. علت برای شخص حذف‌شده ارسال می‌شود."
               data-confirm-title="حذف ادمین + نماینده"
               {% elif src == 'pg_staff' %}
-              data-confirm="ادمین پاسارگارد «{{ uname }}» و دسترسی وب ادمین فرعی حذف شوند؟"
-              data-confirm-title="حذف ادمین پاسارگارد"
+              data-confirm="ادمین S-UI «{{ uname }}» و دسترسی وب ادمین فرعی حذف شوند؟"
+              data-confirm-title="حذف ادمین S-UI"
               {% else %}
-              data-confirm="ادمین پاسارگارد «{{ uname }}» حذف شود؟"
+              data-confirm="ادمین S-UI «{{ uname }}» حذف شود؟"
               data-confirm-title="تأیید حذف"
               {% endif %}
               data-confirm-danger="1"
@@ -183,29 +183,29 @@
   <div class="ui-modal-backdrop" data-modal-close></div>
   <div class="ui-modal-panel" role="dialog" aria-modal="true">
     <div class="ui-modal-head">
-      {{ modal_title('nodes', ('ویرایش ادمین فرعی' if src == 'pg_staff' else 'اعطای ادمین فرعی (فقط پاسارگارد)'), caption='مدیریت پاسارگارد', tone='pg') }}
+      {{ modal_title('nodes', ('ویرایش ادمین فرعی' if src == 'pg_staff' else 'اعطای ادمین فرعی (فقط S-UI)'), caption='مدیریت S-UI', tone='pg') }}
       <button type="button" class="icon-btn" data-modal-close aria-label="بستن"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <form method="post" action="/pg/admins/{{ uname }}/web-access/staff" class="form-stack js-busy-form" data-busy-label="در حال ذخیره…">
-      <p class="muted">ادمین پاسارگارد: <strong dir="ltr">{{ uname }}</strong>
-        — فقط منوی پاسارگارد؛ فروشگاه/ربات ساخته نمی‌شود.</p>
+      <p class="muted">ادمین S-UI: <strong dir="ltr">{{ uname }}</strong>
+        — فقط منوی S-UI؛ فروشگاه/ربات ساخته نمی‌شود.</p>
       {% if src == 'pg_staff' and st.get('username_aligned') is sameas false %}
       <div class="flash warn">
         نام کاربری وب فعلی (<span class="mono" dir="ltr">{{ st.get('web_username') }}</span>)
-        با پاسارگارد (<span class="mono" dir="ltr">{{ uname|lower }}</span>) یکی نیست.
+        با S-UI (<span class="mono" dir="ltr">{{ uname|lower }}</span>) یکی نیست.
         برای ادامه، هم‌ترازسازی را صریحاً تأیید کنید.
       </div>
       {% endif %}
       <label class="form-field">نام کاربری وب‌پنل
         <input name="web_username" required autocomplete="off" dir="ltr" readonly
           value="{{ uname|lower }}" />
-        <small class="muted">باید دقیقاً همان نام ادمین پاسارگارد باشد (ورود یکپارچه)</small>
+        <small class="muted">باید دقیقاً همان نام ادمین S-UI باشد (ورود یکپارچه)</small>
       </label>
       {% if src == 'pg_staff' and st.get('username_aligned') is sameas false %}
       <label class="form-field">
         <span class="ui-check">
           <input type="checkbox" name="confirm_align" value="1" required />
-          هم‌ترازسازی نام کاربری با پاسارگارد
+          هم‌ترازسازی نام کاربری با S-UI
         </span>
         <small class="muted">بدون این تأیید، نام کاربری تغییر نمی‌کند</small>
       </label>
@@ -213,12 +213,12 @@
       <label class="form-field">رمز عبور وب‌پنل
         <input name="web_password" type="password" {% if src == 'none' %}required{% endif %} autocomplete="new-password" dir="ltr"
           placeholder="{% if src == 'pg_staff' %}خالی = حفظ رمز فعلی (اگر اعتبارنامه ذخیره شده){% else %}رمز قوی{% endif %}" />
-        <small class="muted">{% if src == 'pg_staff' %}اگر اعتبارنامه پاسارگارد ذخیره نشده، رمز الزامی است — {% endif %}طبق پاسارگارد: حداقل ۱۲ کاراکتر، دو رقم، دو حرف بزرگ/کوچک و کاراکتر خاص</small>
+        <small class="muted">{% if src == 'pg_staff' %}اگر اعتبارنامه S-UI ذخیره نشده، رمز الزامی است — {% endif %}طبق S-UI: حداقل ۱۲ کاراکتر، دو رقم، دو حرف بزرگ/کوچک و کاراکتر خاص</small>
       </label>
       {% if src == 'pg_staff' or src == 'none' %}
-      <label class="form-field">کلید API پاسارگارد
+      <label class="form-field">کلید API S-UI
         <input name="pg_api_key" type="password" autocomplete="new-password" dir="ltr"
-          placeholder="{% if st.get('api_key_ready') %}خالی بماند تا کلید فعلی حفظ شود{% else %}اختیاری — کلید API پاسارگارد{% endif %}" />
+          placeholder="{% if st.get('api_key_ready') %}خالی بماند تا کلید فعلی حفظ شود{% else %}اختیاری — کلید API S-UI{% endif %}" />
         <small class="muted">ترجیح بر رمز برای API (<code dir="ltr">X-Api-Key</code>){% if st.get('api_key_ready') %} · <span class="badge approved">ذخیره‌شده</span>{% endif %}</small>
       </label>
       {% if st.get('api_key_ready') %}
@@ -274,11 +274,11 @@
       <button type="button" class="icon-btn" data-modal-close aria-label="بستن"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <form method="post" action="/pg/admins/{{ uname }}/convert-to-reseller" class="form-stack js-busy-form" data-busy-label="در حال تبدیل…">
-      <p class="muted">ادمین پاسارگارد: <strong dir="ltr">{{ uname }}</strong>
+      <p class="muted">ادمین S-UI: <strong dir="ltr">{{ uname }}</strong>
         — دسترسی «ادمین فرعی» حذف می‌شود و مسیر «نماینده» (پنل ربات + فروشگاه) جایگزین می‌شود.
-        هر ادمین فقط یکی از این دو مسیر را می‌تواند داشته باشد. محدودیت‌های نقش پاسارگارد و پلن نمایندگی همچنان اعمال می‌شوند.</p>
+        هر ادمین فقط یکی از این دو مسیر را می‌تواند داشته باشد. محدودیت‌های نقش S-UI و پلن نمایندگی همچنان اعمال می‌شوند.</p>
       {% set live_usage = (admin_usage or {}).get(uname|lower) or {} %}
-      <p class="muted">سقف فعلی این ادمین در پاسارگارد (مصرف/سقف): کاربران <strong dir="ltr">{{ live_usage.get('users_text') or '—' }}</strong> · حجم <strong dir="ltr">{{ live_usage.get('traffic_text') or '—' }}</strong>. با پلن «ظرفیت فعلی» همین سقف ثبت می‌شود؛ اگر خوانده نشود، اعطا انجام نمی‌شود.</p>
+      <p class="muted">سقف فعلی این ادمین در S-UI (مصرف/سقف): کاربران <strong dir="ltr">{{ live_usage.get('users_text') or '—' }}</strong> · حجم <strong dir="ltr">{{ live_usage.get('traffic_text') or '—' }}</strong>. با پلن «ظرفیت فعلی» همین سقف ثبت می‌شود؛ اگر خوانده نشود، اعطا انجام نمی‌شود.</p>
       {% set grant_plans = (reseller_plans or [])|selectattr('plan_kind', 'in', ['subscription', 'current_capacity'])|list %}
       {% if not grant_plans %}
       {% set grant_plans = (reseller_plans or [])|rejectattr('plan_kind', 'in', ['addon_volume', 'addon_users'])|list %}
@@ -301,12 +301,12 @@
         {{ switch('confirm_billing_mode_change', 'تأیید تغییر نوع پرداخت', checked=false, help='فقط اگر این ادمین از قبل نماینده است و نوع پلن جدید فرق دارد') }}
         {% if owner_can_toggle_oversell %}{{ oversell_create_switch() }}{% endif %}
       </div>
-      <div class="flash warn">پلن پیش‌فرض «ظرفیت فعلی» سقف حجم/کاربر همین ادمین در پاسارگارد را حفظ می‌کند و صفر نمی‌کند. برای سقف ثابت پلن دیگری انتخاب کنید.</div>
+      <div class="flash warn">پلن پیش‌فرض «ظرفیت فعلی» سقف حجم/کاربر همین ادمین در S-UI را حفظ می‌کند و صفر نمی‌کند. برای سقف ثابت پلن دیگری انتخاب کنید.</div>
       <label class="form-field">رمز عبور مشترک
         <input name="web_password" type="password" autocomplete="new-password" dir="ltr"
           placeholder="{% if st.get('password_ready') %}خالی = استفاده از رمز ذخیره‌شده{% else %}رمز الزامی است{% endif %}"
           {% if not st.get('password_ready') %}required{% endif %} />
-        <small class="muted">رمز وب و پاسارگارد یکی است. اگر رمز ذخیره‌شده دارید، خالی بگذارید (کلید API به‌تنهایی کافی نیست).</small>
+        <small class="muted">رمز وب و S-UI یکی است. اگر رمز ذخیره‌شده دارید، خالی بگذارید (کلید API به‌تنهایی کافی نیست).</small>
       </label>
       <label class="form-field">یادداشت
         <input name="note" placeholder="تبدیل از ادمین فرعی" />
@@ -329,11 +329,11 @@
       <button type="button" class="icon-btn" data-modal-close aria-label="بستن"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <form method="post" action="/pg/admins/{{ uname }}/web-access/reseller" class="form-stack js-busy-form" data-busy-label="در حال ذخیره…">
-      <p class="muted">ادمین پاسارگارد: <strong dir="ltr">{{ uname }}</strong>
-        — منوی پاسارگارد از نقش ادمین؛ فروشگاه/ربات از پلن نمایندگی.
+      <p class="muted">ادمین S-UI: <strong dir="ltr">{{ uname }}</strong>
+        — منوی S-UI از نقش ادمین؛ فروشگاه/ربات از پلن نمایندگی.
         اگر این ادمین قبلاً ادمین فرعی باشد، ابتدا آن دسترسی را حذف کنید.</p>
       {% set live_usage = (admin_usage or {}).get(uname|lower) or {} %}
-      <p class="muted">سقف فعلی این ادمین در پاسارگارد (مصرف/سقف): کاربران <strong dir="ltr">{{ live_usage.get('users_text') or '—' }}</strong> · حجم <strong dir="ltr">{{ live_usage.get('traffic_text') or '—' }}</strong>. با پلن «ظرفیت فعلی» همین سقف ثبت می‌شود؛ اگر خوانده نشود، اعطا انجام نمی‌شود.</p>
+      <p class="muted">سقف فعلی این ادمین در S-UI (مصرف/سقف): کاربران <strong dir="ltr">{{ live_usage.get('users_text') or '—' }}</strong> · حجم <strong dir="ltr">{{ live_usage.get('traffic_text') or '—' }}</strong>. با پلن «ظرفیت فعلی» همین سقف ثبت می‌شود؛ اگر خوانده نشود، اعطا انجام نمی‌شود.</p>
       {% set grant_plans = (reseller_plans or [])|selectattr('plan_kind', 'in', ['subscription', 'current_capacity'])|list %}
       {% if not grant_plans %}
       {% set grant_plans = (reseller_plans or [])|rejectattr('plan_kind', 'in', ['addon_volume', 'addon_users'])|list %}
@@ -352,15 +352,15 @@
         </select>
         <small class="muted">دسترسی‌های داشبورد، پلن، سفارش، تنظیمات ربات و… از این پلن کپی می‌شود</small>
       </label>
-      <div class="flash warn">پلن پیش‌فرض «ظرفیت فعلی» سقف حجم/کاربر همین ادمین در پاسارگارد را حفظ می‌کند و صفر نمی‌کند. برای سقف ثابت پلن دیگری انتخاب کنید.</div>
+      <div class="flash warn">پلن پیش‌فرض «ظرفیت فعلی» سقف حجم/کاربر همین ادمین در S-UI را حفظ می‌کند و صفر نمی‌کند. برای سقف ثابت پلن دیگری انتخاب کنید.</div>
       <label class="form-field">نام کاربری وب‌پنل
         <input name="web_username" required autocomplete="off" dir="ltr" readonly
           value="{{ uname|lower }}" />
-        <small class="muted">باید دقیقاً همان نام ادمین پاسارگارد باشد</small>
+        <small class="muted">باید دقیقاً همان نام ادمین S-UI باشد</small>
       </label>
       <label class="form-field">رمز عبور وب‌پنل
         <input name="web_password" type="password" required autocomplete="new-password" dir="ltr" placeholder="رمز قوی" />
-        <small class="muted">طبق پاسارگارد: حداقل ۱۲ کاراکتر، دو رقم، دو حرف بزرگ/کوچک و کاراکتر خاص</small>
+        <small class="muted">طبق S-UI: حداقل ۱۲ کاراکتر، دو رقم، دو حرف بزرگ/کوچک و کاراکتر خاص</small>
       </label>
       <label class="form-field">یادداشت
         <input name="note" placeholder="نماینده فروش" />
@@ -382,7 +382,7 @@
   <div class="ui-modal-backdrop" data-modal-close></div>
   <div class="ui-modal-panel ui-modal-panel-lg" role="dialog" aria-modal="true">
     <div class="ui-modal-head">
-      {{ modal_title('admins', 'ساخت ادمین پنل', caption='ادمین پاسارگارد جدید', tone='pg') }}
+      {{ modal_title('admins', 'ساخت ادمین پنل', caption='ادمین S-UI جدید', tone='pg') }}
       <button type="button" class="icon-btn" data-modal-close aria-label="بستن"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <form method="post" action="/pg/admins" class="form-stack js-busy-form" data-busy-label="در حال ساخت…">
@@ -396,11 +396,11 @@
         <div>
           <label class="form-field">رمز عبور
             <input name="password" type="password" required autocomplete="new-password" dir="ltr" placeholder="رمز قوی" minlength="12" />
-            <small class="muted">حداقل ۱۲ کاراکتر شامل دو رقم، دو حرف بزرگ، دو حرف کوچک و یک نماد. برای پاسارگارد و وب یکی است.</small>
+            <small class="muted">حداقل ۱۲ کاراکتر شامل دو رقم، دو حرف بزرگ، دو حرف کوچک و یک نماد. برای S-UI و وب یکی است.</small>
           </label>
         </div>
         <div>
-          <label class="form-field">نقش پاسارگارد
+          <label class="form-field">نقش S-UI
             <select name="role_id">
               <option value="">— بدون نقش (سازگاری قدیم) —</option>
               {% for r in pg_roles or [] %}
@@ -435,7 +435,7 @@
       </div>
       <label class="form-field">یادداشت
         <input name="note" placeholder="نماینده فروش" />
-        <small class="muted">اختیاری — در پاسارگارد ذخیره می‌شود</small>
+        <small class="muted">اختیاری — در S-UI ذخیره می‌شود</small>
       </label>
       <div class="ui-switch-list">
         {{ switch('as_reseller', 'این ادمین نماینده شود (ربات شخصی + پنل فروشگاه)', checked=false, help='با روشن کردن، پلن و دسترسی‌های پنل نماینده نمایش داده می‌شود', id='create-as-reseller') }}
@@ -465,12 +465,12 @@
           </div>
         </div>
         <div class="ui-switch-list">
-          {{ switch('share_pg_panel_url', 'ارسال لینک و یوزر/رمز پنل پاسارگارد', checked=false, help='اگر خاموش باشد، نماینده فقط از وب‌پنل ربات مدیریت می‌کند', id='create-share-pg') }}
+          {{ switch('share_pg_panel_url', 'ارسال لینک و یوزر/رمز پنل S-UI', checked=false, help='اگر خاموش باشد، نماینده فقط از وب‌پنل ربات مدیریت می‌کند', id='create-share-pg') }}
           {% if owner_can_toggle_oversell %}{{ oversell_create_switch() }}{% endif %}
         </div>
       </div>
       <div class="ui-switch-list" id="create-staff-web-wrap">
-        {{ switch('grant_web', 'دسترسی وب ادمین فرعی (فقط پاسارگارد)', checked=true, help='بدون فروشگاه/ربات — فقط منوی پاسارگارد مطابق نقش', id='create-grant-web') }}
+        {{ switch('grant_web', 'دسترسی وب ادمین فرعی (فقط S-UI)', checked=true, help='بدون فروشگاه/ربات — فقط منوی S-UI مطابق نقش', id='create-grant-web') }}
       </div>
       <div class="ui-switch-list">
         {{ switch('is_sudo', 'دسترسی کامل (قدیمی)', help='فقط پنل‌های قدیمی؛ در نسخه‌های جدید از نقش استفاده کنید') }}

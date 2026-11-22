@@ -2019,7 +2019,7 @@ def admin_reseller_actions(
     rows: list[list[InlineKeyboardButton]] = [
         [
             InlineKeyboardButton(
-                text="📦 سرویس‌های پاسارگارد",
+                text="📦 سرویس‌های S-UI",
                 callback_data=f"adm:resellers:svcs:{user_id}",
             )
         ],
@@ -2379,7 +2379,7 @@ def admin_user_service_delete_confirm(
                 ],
                 [
                     InlineKeyboardButton(
-                        text="🗑 حذف همراه حساب پاسارگارد",
+                        text="🗑 حذف همراه حساب S-UI",
                         callback_data=f"adm:users:svcdel:{user_id}:{service_id}:pg",
                     )
                 ],

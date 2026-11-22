@@ -110,7 +110,7 @@ class PgNodeStates(StatesGroup):
 
 
 def _err_msg(exc: Exception) -> str:
-    return user_safe_error(exc, fallback="خطا در ارتباط با پاسارگارد")
+    return user_safe_error(exc, fallback="خطا در ارتباط با S-UI")
 
 
 
@@ -202,7 +202,7 @@ async def _render_nodes_list(callback: CallbackQuery, gate) -> None:
         return
     if not isinstance(items, list):
         items = []
-    lines = ["🕸 <b>نودهای پاسارگارد</b>\n"]
+    lines = ["🕸 <b>نودهای S-UI</b>\n"]
     if not items:
         lines.append("نودی یافت نشد.")
     else:
@@ -1012,5 +1012,5 @@ async def pg_node_create_server_ca(
         return
     # The node list, with the outcome on top, replaces the last prompt.
     await finish_text_step(
-        message, state, text="✅ نود ساخته شد.\n\n🕸 <b>نودهای پاسارگارد</b>", inline=_nodes_list_kb(items)
+        message, state, text="✅ نود ساخته شد.\n\n🕸 <b>نودهای S-UI</b>", inline=_nodes_list_kb(items)
     )

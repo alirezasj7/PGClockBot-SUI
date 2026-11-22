@@ -124,7 +124,7 @@ def _admin_screens() -> list[ScreenSpec]:
             "a.marketing", "بازاریابی", lambda ctx: hubs.admin_marketing_hub_keyboard(ctx.ui), "nv:adm:marketing"
         ),
         admin("a.system", "سیستم", lambda ctx: hubs.admin_system_hub_keyboard(ctx.ui), "nv:adm:system"),
-        admin("a.pg", "پاسارگارد", lambda ctx: hubs.pg_hub_keyboard(ctx.ui), "nv:adm:pg"),
+        admin("a.pg", "S-UI", lambda ctx: hubs.pg_hub_keyboard(ctx.ui), "nv:adm:pg"),
         admin(
             "a.loyalty", "مدیریت باشگاه", lambda ctx: hubs.admin_loyalty_manage_hub_keyboard(ctx.ui), "nv:adm:loy"
         ),

@@ -48,7 +48,7 @@ router = Router(name="admin_pg_users")
 
 def _err_msg(exc: Exception) -> str:
     """Persian-friendly PasarGuard / local error for bot replies."""
-    return user_safe_error(exc, fallback="خطا در ارتباط با پاسارگارد")
+    return user_safe_error(exc, fallback="خطا در ارتباط با S-UI")
 
 async def _require_users(db_user: BotUser, callback=None, message=None, *, action: str | None = None) -> bool:
     """Legacy platform-admin page gate (kept for source contracts).
@@ -64,9 +64,9 @@ async def _require_users(db_user: BotUser, callback=None, message=None, *, actio
         return False
     if not await can_platform_pg_page(db_user, "pg_users"):
         if callback is not None:
-            await callback.answer("به کاربران پاسارگارد دسترسی ندارید", show_alert=True)
+            await callback.answer("به کاربران S-UI دسترسی ندارید", show_alert=True)
         elif message is not None:
-            await message.answer("به کاربران پاسارگارد دسترسی ندارید.")
+            await message.answer("به کاربران S-UI دسترسی ندارید.")
         return False
     if action and not await can_platform_pg_action(db_user, "users", action):
         if callback is not None:
@@ -282,7 +282,7 @@ async def _render_users_list(
         )
     rows.append([kb.back_button(None, PG_HUB_CALLBACK)])
 
-    title = "👥 کاربران پاسارگارد"
+    title = "👥 کاربران S-UI"
     bits = [f"صفحه {page_label}"]
     if total is not None:
         bits.append(f"جمع: {total}")
@@ -357,7 +357,7 @@ async def adm_pg(
         reseller_profile_id=reseller_profile_id,
         reseller_owner_id=reseller_owner_id,
     ):
-        await callback.answer("دسترسی پاسارگارد برای این حساب تعریف نشده", show_alert=True)
+        await callback.answer("دسترسی S-UI برای این حساب تعریف نشده", show_alert=True)
         return
     await callback.answer()
     if not callback.message:
@@ -405,7 +405,7 @@ async def adm_pg_group_hint(
         await callback.answer(gate.user_message, show_alert=True)
         return
     await callback.answer()
-    lines = ["📁 <b>گروه‌های پاسارگارد</b>\n"]
+    lines = ["📁 <b>گروه‌های S-UI</b>\n"]
     try:
         groups = await list_scoped_pg_catalog(gate, kind="groups")
     except Exception as e:
@@ -466,7 +466,7 @@ async def adm_pg_template_hint(
         await callback.answer(gate.user_message, show_alert=True)
         return
     await callback.answer()
-    lines = ["📋 <b>تمپلیت‌های پاسارگارد</b>\n"]
+    lines = ["📋 <b>تمپلیت‌های S-UI</b>\n"]
     try:
         templates = await list_scoped_pg_catalog(gate, kind="templates")
     except Exception as e:
@@ -486,7 +486,7 @@ async def adm_pg_template_hint(
             "",
             "ساخت تمپلیت از وب‌پنل مسیر <code>/pg/templates</code>.",
             "",
-            "ساخت کاربر از تمپلیت در ربات: پاسارگارد ← ساخت کاربر.",
+            "ساخت کاربر از تمپلیت در ربات: S-UI ← ساخت کاربر.",
         ]
     )
     if callback.message:
@@ -587,7 +587,7 @@ async def pg_search_start(
         callback,
         state,
         prompt=(
-            "نام کاربری پاسارگارد را برای جستجو بفرستید:\n"
+            "نام کاربری S-UI را برای جستجو بفرستید:\n"
             "(جستجو در لیست فیلتر می‌شود؛ برای انصراف «انصراف» بزنید)"
         ),
         cancel_code="adm_pg_u",

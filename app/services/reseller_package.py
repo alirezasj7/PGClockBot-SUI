@@ -172,7 +172,7 @@ async def read_admin_usage(pg_username: str) -> AdminUsage | None:
 def _pg_username(profile: ResellerProfile) -> str:
     uname = (profile.pg_admin_username or "").strip()
     if not uname:
-        raise ValueError("ادمین پاسارگارد برای این نماینده تنظیم نشده است")
+        raise ValueError("ادمین S-UI برای این نماینده تنظیم نشده است")
     return uname
 
 

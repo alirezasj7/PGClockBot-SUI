@@ -319,7 +319,7 @@ async def _notify_suspended(session: AsyncSession, profile: ResellerProfile) -> 
     text = (
         "🚫 <b>حساب نمایندگی شما مسدود شد</b>\n\n"
         "موجودی کیف پول شما برای PAYG صفر شده است.\n"
-        "ادمین پاسارگارد و تمام سرویس‌های شما قطع شدند.\n\n"
+        "ادمین S-UI و تمام سرویس‌های شما قطع شدند.\n\n"
         f"موجودی فعلی کیف پول: <b>{format_toman(bal_now)}</b>\n"
         f"برای رفع مسدودی، حداقل <b>{format_toman(need)}</b> شارژ کنید "
         "(دو برابر آستانه هشدار).\n"

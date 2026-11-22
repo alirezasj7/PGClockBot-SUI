@@ -41,7 +41,7 @@ async def _staff_pg_client(session: AsyncSession, staff: dict):
             principal_id=staff.get("org_principal_id"),
             pg_username=staff.get("pg_admin_username"),
         ), False
-    raise PasarGuardError("تغییر در پاسارگارد بدون اعتبارنامه اختصاصی ممکن نیست.")
+    raise PasarGuardError("تغییر در S-UI بدون اعتبارنامه اختصاصی ممکن نیست.")
 
 
 async def bulk_reseller_app_action(

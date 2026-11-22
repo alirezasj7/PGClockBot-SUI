@@ -281,6 +281,14 @@ async def build_delivery_content(
                         ]
                     )
                 )
+            if include_details and svc.pg_username:
+                try:
+                    links = await get_pg().direct_links(svc.pg_username)
+                except Exception:
+                    logger.warning("Unable to load direct links for service %s", svc.id, exc_info=True)
+                    links = []
+                if links:
+                    detail_parts.append(info_block(["📡 <b>کانفیگ مستقیم</b>", *[copyable(link) for link in links]]))
             markup = kb.service_actions(svc.id, ui)
 
         if send_kw.get("entities"):

@@ -970,7 +970,7 @@ async def open_pg_home(
         )
         await present_nav_panel(
             message,
-            text="🖥 پاسارگارد در دسترس نیست — به محصول برگردید.",
+            text="🖥 S-UI در دسترس نیست — به محصول برگردید.",
             inline=unavailable_keyboard,
             state=state,
         )

@@ -1,7 +1,7 @@
 ﻿{% extends "base.html" %}
 {% from "macros.html" import row_actions, page_title, table_select_head, table_select_cell, table_bulk_bar, modal_title %}
 {% from "_list_input.html" import list_input %}
-{% block title %}هاست‌های پاسارگارد{% endblock %}
+{% block title %}هاست‌های S-UI{% endblock %}
 {% block content %}
 <div class="page-head">
   <div>
@@ -79,7 +79,7 @@
   <div class="ui-modal-backdrop" data-modal-close></div>
   <div class="ui-modal-panel" role="dialog" aria-modal="true">
     <div class="ui-modal-head">
-      {{ modal_title('hosts', 'ساخت هاست', caption='هاست جدید پاسارگارد', tone='pg') }}
+      {{ modal_title('hosts', 'ساخت هاست', caption='هاست جدید S-UI', tone='pg') }}
       <button type="button" class="icon-btn" data-modal-close aria-label="بستن"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <form method="post" action="/pg/hosts" class="form-stack">
@@ -112,7 +112,7 @@
         </select>
       </label>
       <div class="actions">
-        <button class="btn" type="submit">ساخت در پاسارگارد</button>
+        <button class="btn" type="submit">ساخت در S-UI</button>
         <button type="button" class="btn btn-ghost" data-modal-close>انصراف</button>
       </div>
     </form>

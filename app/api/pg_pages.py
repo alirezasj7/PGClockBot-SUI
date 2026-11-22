@@ -45,7 +45,7 @@ from app.services.volume_allocation import apply_create_form_oversell
 
 logger = logging.getLogger(__name__)
 
-PG_STATS_ERROR = "دریافت آمار پاسارگارد ممکن نشد؛ چند لحظهٔ دیگر صفحه را تازه کنید."
+PG_STATS_ERROR = "دریافت آمار S-UI ممکن نشد؛ چند لحظهٔ دیگر صفحه را تازه کنید."
 
 def _q(msg: str) -> str:
     return quote(str(msg), safe="")
@@ -81,8 +81,8 @@ async def _staff_pg(session: AsyncSession, staff: dict):
             pg_username=staff.get("pg_admin_username"),
         ), False
     raise PasarGuardError(
-        "تغییر در پاسارگارد بدون اعتبارنامه اختصاصی ممکن نیست. "
-        "علت محتمل: رمز ادمین فرعی هنوز با پاسارگارد همگام نشده. "
+        "تغییر در S-UI بدون اعتبارنامه اختصاصی ممکن نیست. "
+        "علت محتمل: رمز ادمین فرعی هنوز با S-UI همگام نشده. "
         "راه حل: ادمین اصلی از «ادمین‌ها» دسترسی ادمین فرعی را با رمز جدید ویرایش کند."
     )
 
@@ -172,7 +172,7 @@ def _pg_form_err(msg: str, *, modal: str, uid: str | int | None = None) -> Redir
 
 def _pg_err(exc: Exception) -> str:
     if isinstance(exc, PasarGuardError):
-        return _q(exc.user_message(fallback="خطا در ارتباط با پاسارگارد"))
+        return _q(exc.user_message(fallback="خطا در ارتباط با S-UI"))
     return _q(exc)
 
 
@@ -712,7 +712,7 @@ def register_pg_pages(
         # bypasses every role quota (max_users / volume / expire).
         if not _is_admin(staff) and not _pg_owner(staff):
             return _pg_form_err(
-                "ادمین پاسارگارد برای این حساب تنظیم نشده است",
+                "ادمین S-UI برای این حساب تنظیم نشده است",
                 modal="create",
             )
         hold = None
@@ -1597,7 +1597,7 @@ def register_pg_pages(
     ):
         if not staff_pg_action(staff, "nodes", "reconnect"):
             return RedirectResponse(
-                f"/pg/nodes?err={_q('اجازه اتصال مجدد ندارید. علت: نقش پاسارگارد این عمل را ندارد. راه حل: نقش ادمین را در پاسارگارد بررسی کنید.')}",
+                f"/pg/nodes?err={_q('اجازه اتصال مجدد ندارید. علت: نقش S-UI این عمل را ندارد. راه حل: نقش ادمین را در S-UI بررسی کنید.')}",
                 status_code=303,
             )
         try:
@@ -1612,7 +1612,7 @@ def register_pg_pages(
         except Exception as e:
             msg = e.user_message(fallback=str(e)) if isinstance(e, PasarGuardError) else str(e)
             return RedirectResponse(
-                f"/pg/nodes?err={_q(f'اتصال مجدد ناموفق: {msg}. علت محتمل: نود آفلاین یا API نود. راه حل: وضعیت نود را در پاسارگارد بررسی کنید.')}",
+                f"/pg/nodes?err={_q(f'اتصال مجدد ناموفق: {msg}. علت محتمل: نود آفلاین یا API نود. راه حل: وضعیت نود را در S-UI بررسی کنید.')}",
                 status_code=303,
             )
         return RedirectResponse(f"/pg/nodes?ok={_q('درخواست اتصال مجدد ارسال شد')}", status_code=303)
@@ -1764,7 +1764,7 @@ def register_pg_pages(
         except Exception as e:
             msg = e.user_message(fallback=str(e)) if isinstance(e, PasarGuardError) else str(e)
             return RedirectResponse(
-                f"/pg/nodes?err={_q(f'ساخت نود ناموفق: {msg}. علت محتمل: فیلدهای الزامی ناقص (api_key/گواهی). راه حل: مقادیر را از پنل پاسارگارد کپی کنید.')}",
+                f"/pg/nodes?err={_q(f'ساخت نود ناموفق: {msg}. علت محتمل: فیلدهای الزامی ناقص (api_key/گواهی). راه حل: مقادیر را از پنل S-UI کپی کنید.')}",
                 status_code=303,
             )
         return RedirectResponse(f"/pg/nodes?ok={_q('نود ساخته شد')}", status_code=303)
@@ -1778,11 +1778,10 @@ def register_pg_pages(
         from app.services.pg_read import PgReadDenied, staff_pg_read_client
 
         err = request.query_params.get("err")
-        inbounds, details = [], None
+        inbounds = []
         try:
             pg = await staff_pg_read_client(session, staff)
             inbounds = await pg.get_inbounds()
-            details = await pg.get_inbounds_details()
         except PgReadDenied as e:
             err = e.message
         except Exception as e:
@@ -1790,7 +1789,7 @@ def register_pg_pages(
         return render(
             request,
             "pg_inbounds.html",
-            _pg_ctx(staff, inbounds=inbounds, details=details, flash_err=err, active="pg_inbounds"),
+            _pg_ctx(staff, inbounds=inbounds, flash_err=err, active="pg_inbounds"),
         )
 
     @app.get("/pg/admins", response_class=HTMLResponse)
@@ -2021,7 +2020,7 @@ def register_pg_pages(
             # Do not retry without role_id / with elevated flags — fail closed.
             return RedirectResponse(f"/pg/admins?err={_pg_err(e)}", status_code=303)
 
-        msg = f"ادمین «{uname}» در پاسارگارد ساخته شد"
+        msg = f"ادمین «{uname}» در S-UI ساخته شد"
         # One web path only: reseller XOR pg_staff (never both)
         if as_reseller:
             from app.db.models import ResellerPlan
@@ -2059,7 +2058,7 @@ def register_pg_pages(
                 session, _profile.user_id if _profile else None,
                 form_value=form.get("allow_volume_oversell"), actor_is_owner=is_explicit_owner_staff(staff),
             )
-            msg += " و به‌عنوان نماینده (پنل ربات + پاسارگارد) فعال شد"
+            msg += " و به‌عنوان نماینده (پنل ربات + S-UI) فعال شد"
             if hint:
                 msg += " — ربات شخصی را از تنظیمات فروشگاه راه‌اندازی کنید"
         elif grant_web:
@@ -2078,7 +2077,7 @@ def register_pg_pages(
                     f"/pg/admins?err={_q(f'{msg} — ولی دسترسی وب ساخته نشد: {werr}')}",
                     status_code=303,
                 )
-            msg += " و دسترسی وب ادمین فرعی (فقط پاسارگارد) فعال شد"
+            msg += " و دسترسی وب ادمین فرعی (فقط S-UI) فعال شد"
         return RedirectResponse(f"/pg/admins?ok={_q(msg)}", status_code=303)
 
     @app.post("/pg/admins/{username}/web-access")
@@ -2137,12 +2136,12 @@ def register_pg_pages(
             return RedirectResponse(f"/pg/admins?err={_q(e)}", status_code=303)
         if not admin:
             return RedirectResponse(
-                f"/pg/admins?err={_q('این ادمین در پاسارگارد یافت نشد')}",
+                f"/pg/admins?err={_q('این ادمین در S-UI یافت نشد')}",
                 status_code=303,
             )
         if classify_pg_admin_dict(admin) == "disabled":
             return RedirectResponse(
-                f"/pg/admins?err={_q('این ادمین در پاسارگارد غیرفعال است — ابتدا فعالش کنید')}",
+                f"/pg/admins?err={_q('این ادمین در S-UI غیرفعال است — ابتدا فعالش کنید')}",
                 status_code=303,
             )
 
@@ -2211,7 +2210,7 @@ def register_pg_pages(
         if err:
             return RedirectResponse(f"/pg/admins?err={_q(err)}", status_code=303)
         uname = row.web_username if row else web_username
-        msg = f"دسترسی ادمین فرعی «{uname}» ذخیره شد — فقط منوی پاسارگارد (بدون فروشگاه)"
+        msg = f"دسترسی ادمین فرعی «{uname}» ذخیره شد — فقط منوی S-UI (بدون فروشگاه)"
         return RedirectResponse(f"/pg/admins?ok={_q(msg)}", status_code=303)
 
     @app.post("/pg/admins/{username}/subscription/renew")
@@ -2299,12 +2298,12 @@ def register_pg_pages(
             return RedirectResponse(f"/pg/admins?err={_q(e)}", status_code=303)
         if not admin:
             return RedirectResponse(
-                f"/pg/admins?err={_q('این ادمین در پاسارگارد یافت نشد')}",
+                f"/pg/admins?err={_q('این ادمین در S-UI یافت نشد')}",
                 status_code=303,
             )
         if classify_pg_admin_dict(admin) == "disabled":
             return RedirectResponse(
-                f"/pg/admins?err={_q('این ادمین در پاسارگارد غیرفعال است — ابتدا فعالش کنید')}",
+                f"/pg/admins?err={_q('این ادمین در S-UI غیرفعال است — ابتدا فعالش کنید')}",
                 status_code=303,
             )
 
@@ -2465,14 +2464,14 @@ def register_pg_pages(
                 )
                 notes.append("نمایندگی/ربات فروشگاه هم حذف شد")
                 if info.get("pg_admin_deleted"):
-                    notes.append("ادمین پاسارگارد حذف شد")
+                    notes.append("ادمین S-UI حذف شد")
                 else:
                     # Profile removed; PG may already be gone — try direct delete
                     try:
                         await get_pg().delete_admin(pg_u)
-                        notes.append("ادمین پاسارگارد حذف شد")
+                        notes.append("ادمین S-UI حذف شد")
                     except Exception:
-                        notes.append("ادمین پاسارگارد از قبل نبود یا حذف نشد")
+                        notes.append("ادمین S-UI از قبل نبود یا حذف نشد")
                 tg = info.get("telegram_id")
                 if tg:
                     try:
@@ -2484,7 +2483,7 @@ def register_pg_pages(
         else:
             try:
                 await get_pg().delete_admin(pg_u)
-                notes.append("ادمین پاسارگارد حذف شد")
+                notes.append("ادمین S-UI حذف شد")
             except Exception as e:
                 return RedirectResponse(f"/pg/admins?err={_pg_err(e)}", status_code=303)
 

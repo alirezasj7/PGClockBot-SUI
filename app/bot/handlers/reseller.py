@@ -739,7 +739,7 @@ async def res_stats(
         f"تأیید رسید: {'بله' if has_bot_perm(profile, 'payments') else 'خیر'}\n"
         f"وب‌پنل: <code>{profile.web_username or '—'}</code>\n"
         f"ربات: <code>{('@' + profile.bot_username) if profile.bot_username else '—'}</code>\n"
-        f"ادمین پاسارگارد: <code>{profile.pg_admin_username or '—'}</code>"
+        f"ادمین S-UI: <code>{profile.pg_admin_username or '—'}</code>"
     )
     if callback.message:
         await safe_edit_text(callback.message, text, reply_markup=_group_back("res_stats"))
@@ -1575,7 +1575,7 @@ async def res_buy_gb(
             format_message(
                 "📦 خرید حجم اضافه",
                 f"نرخ: <b>{format_toman(price, get_settings().currency)}</b> / گیگابایت\n"
-                "سقف حجم ادمین پاسارگارد شما افزایش می‌یابد.\n"
+                "سقف حجم ادمین S-UI شما افزایش می‌یابد.\n"
                 "هزینه از کیف پول فروشگاه کسر می‌شود.",
             ),
             reply_markup=InlineKeyboardMarkup(inline_keyboard=rows),

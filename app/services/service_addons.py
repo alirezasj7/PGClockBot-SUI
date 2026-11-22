@@ -755,12 +755,12 @@ async def _apply_pack_to_service(
         from app.services.users import current_shop_reseller_id
 
         if current_shop_reseller_id():
-            raise ValueError("فروشگاه بدون اعتبار پاسارگارد معتبر است")
+            raise ValueError("فروشگاه بدون اعتبار S-UI معتبر است")
         pg = get_pg()
 
     info = await pg.get_user_by_id(int(service.pg_user_id))
     if not isinstance(info, dict):
-        raise ValueError("کاربر پاسارگارد یافت نشد")
+        raise ValueError("کاربر S-UI یافت نشد")
 
     payload: dict[str, Any] = {"status": "active"}
     expire_ts = None

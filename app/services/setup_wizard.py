@@ -29,12 +29,6 @@ WIZARD_ENV_KEYS = (
     "BOT_TOKEN",
     "BOT_USERNAME",
     "ADMIN_IDS",
-    "PANEL_BACKEND",
-    "PG_BASE_URL",
-    "PG_SUBSCRIPTION_PATH",
-    "PG_USERNAME",
-    "PG_PASSWORD",
-    "PG_API_KEY",
     "SUI_BASE_URL",
     "SUI_API_TOKEN",
     "SUI_SUBSCRIPTION_BASE_URL",
@@ -296,12 +290,6 @@ def _env_get(key: str) -> str:
             "BOT_TOKEN": settings.bot_token,
             "BOT_USERNAME": settings.bot_username,
             "ADMIN_IDS": ",".join(str(i) for i in settings.admin_ids),
-            "PANEL_BACKEND": settings.panel_backend,
-            "PG_BASE_URL": settings.pg_base_url,
-            "PG_SUBSCRIPTION_PATH": settings.pg_subscription_path,
-            "PG_USERNAME": settings.pg_username,
-            "PG_PASSWORD": settings.pg_password,
-            "PG_API_KEY": settings.pg_api_key,
             "SUI_BASE_URL": settings.sui_base_url,
             "SUI_API_TOKEN": settings.sui_api_token,
             "SUI_SUBSCRIPTION_BASE_URL": settings.sui_subscription_base_url,
@@ -606,12 +594,7 @@ def current_setup_values() -> dict[str, str]:
         "BOT_TOKEN": _env_get("BOT_TOKEN"),
         "BOT_USERNAME": _env_get("BOT_USERNAME"),
         "ADMIN_IDS": _env_get("ADMIN_IDS"),
-        "PANEL_BACKEND": _env_get("PANEL_BACKEND") or "pasarguard",
-        "PG_BASE_URL": _env_get("PG_BASE_URL"),
-        "PG_SUBSCRIPTION_PATH": _env_get("PG_SUBSCRIPTION_PATH") or "/sub",
-        "PG_USERNAME": _env_get("PG_USERNAME"),
-        "PG_PASSWORD": _env_get("PG_PASSWORD"),
-        "PG_API_KEY": _env_get("PG_API_KEY"),
+        "PANEL_BACKEND": "sui",
         "SUI_BASE_URL": _env_get("SUI_BASE_URL"),
         "SUI_API_TOKEN": _env_get("SUI_API_TOKEN"),
         "SUI_SUBSCRIPTION_BASE_URL": _env_get("SUI_SUBSCRIPTION_BASE_URL"),
@@ -816,6 +799,7 @@ async def validate_sui_setup(
 
     from types import SimpleNamespace
 
+    from app.services.pasarguard import PasarGuardError
     from app.services.sui import SuiClient
 
     settings = SimpleNamespace(
@@ -827,9 +811,15 @@ async def validate_sui_setup(
     )
     client = SuiClient(settings=settings)
     try:
-        await client.request("GET", "status", params={"r": "sys"})
-    except Exception as exc:
-        raise ValueError("اتصال به S-UI ناموفق بود؛ آدرس و توکن API v2 را بررسی کنید.") from exc
+        await client.check_connection()
+    except PasarGuardError as exc:
+        message = {
+            401: "توکن API v2 پنل S-UI نامعتبر یا منقضی است.",
+            403: "S-UI اجازه دسترسی به API را نداد.",
+            404: "مسیر API پیدا نشد. آدرس وب S-UI را با مسیر پنل، مثل /app، وارد کنید.",
+            502: "آدرس واردشده پاسخ معتبر API v2 پنل S-UI را برنگرداند.",
+        }.get(exc.status_code, "اتصال به API پنل S-UI ناموفق بود.")
+        raise ValueError(message) from exc
     finally:
         await client.close()
     return {
@@ -870,8 +860,6 @@ async def prepare_sui_env_update(
     if port < 1 or port > 65535:
         raise ValueError("پورت وب‌پنل نامعتبر است.")
     public = (public_base_url or "").strip().rstrip("/")
-    if public.startswith("https://"):
-        public = "http://" + public[len("https://") :]
     return {
         **sui_values,
         "WEB_PORT": str(port),
@@ -893,7 +881,7 @@ async def setup_pg_access_audit() -> dict[str, Any]:
         return public_pg_access_audit(
             {
                 "ok": False,
-                "error": "اعتبارنامه پاسارگارد ناقص است (رمز یا کلید API)",
+                "error": "اعتبارنامه S-UI ناقص است (رمز یا کلید API)",
                 "username": uname or None,
             }
         )
@@ -907,6 +895,6 @@ async def setup_pg_access_audit() -> dict[str, Any]:
         )
     except Exception:
         return public_pg_access_audit(
-            {"ok": False, "error": "بررسی دسترسی پاسارگارد ناموفق بود", "username": uname}
+            {"ok": False, "error": "بررسی دسترسی S-UI ناموفق بود", "username": uname}
         )
     return public_pg_access_audit(caps)

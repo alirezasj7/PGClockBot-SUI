@@ -89,7 +89,7 @@ async def start_add_representative(
         return
     await state.set_state(ResellerRepStates.username)
     await message.answer(
-        "➕ افزودن نماینده\n\nنام کاربری پاسارگارد نمایندهٔ جدید را بفرستید.\n"
+        "➕ افزودن نماینده\n\nنام کاربری S-UI نمایندهٔ جدید را بفرستید.\n"
         "نمایندهٔ جدید زیرمجموعهٔ همین حساب ساخته می‌شود."
     )
 
@@ -121,7 +121,7 @@ async def rrep_username(
         return
     await state.update_data(**{_USERNAME_KEY: username})
     await state.set_state(ResellerRepStates.password)
-    await message.answer("رمز پاسارگارد نماینده را بفرستید.")
+    await message.answer("رمز S-UI نماینده را بفرستید.")
 
 
 @router.message(ResellerRepStates.password, F.text)
@@ -156,7 +156,7 @@ async def rrep_password(
     roles = await _parent_roles(session, staff)
     if not roles:
         await state.clear()
-        await message.answer("نقشی در پاسارگارد برای نمایندهٔ جدید پیدا نشد. از ادمین بخواهید یک نقش بسازد.")
+        await message.answer("نقشی در S-UI برای نمایندهٔ جدید پیدا نشد. از ادمین بخواهید یک نقش بسازد.")
         return
     rows = [
         [
@@ -169,7 +169,7 @@ async def rrep_password(
     ]
     rows.append([InlineKeyboardButton(text="انصراف", callback_data="rrep:cancel")])
     await message.answer(
-        "نقش پاسارگارد را انتخاب کنید. نام نقش، سطح سازمان نیست.",
+        "نقش S-UI را انتخاب کنید. نام نقش، سطح سازمان نیست.",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=rows),
     )
 

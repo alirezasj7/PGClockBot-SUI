@@ -56,12 +56,12 @@
         </div>
       </div>
       <div>
-        <label class="form-field">یوزرنیم پاسارگارد
+        <label class="form-field">یوزرنیم S-UI
           <input name="pg_admin_username" value="{{ profile.pg_admin_username or '' }}" dir="ltr" />
         </label>
       </div>
       <div>
-        <label class="form-field">نقش پاسارگارد
+        <label class="form-field">نقش S-UI
           <select name="pg_role_id" class="select-block">
             <option value="">—</option>
             {% for r in pg_roles %}
@@ -89,28 +89,28 @@
 
     <p class="muted">
       {% if profile.web_username and profile.pg_admin_username and profile.web_username == profile.pg_admin_username %}
-      یوزر یکپارچه (وب‌پنل + پاسارگارد): <code dir="ltr">{{ profile.web_username }}</code>
+      یوزر یکپارچه (وب‌پنل + S-UI): <code dir="ltr">{{ profile.web_username }}</code>
       {% else %}
       وب: <code dir="ltr">{{ profile.web_username or 'هنوز ساخته نشده' }}</code>
-      {% if profile.pg_admin_username %} · پاسارگارد: <code dir="ltr">{{ profile.pg_admin_username }}</code>{% endif %}
+      {% if profile.pg_admin_username %} · S-UI: <code dir="ltr">{{ profile.pg_admin_username }}</code>{% endif %}
       {% endif %}
       · ربات: <code dir="ltr">{% if profile.bot_username %}@{{ profile.bot_username }}{% else %}—{% endif %}</code>
     </p>
 
     {% if profile.web_username %}
-    <label class="form-field">رمز عبور (وب‌پنل{% if profile.pg_admin_username %} + پاسارگارد{% endif %})
+    <label class="form-field">رمز عبور (وب‌پنل{% if profile.pg_admin_username %} + S-UI{% endif %})
       <input name="web_password" type="password" autocomplete="new-password" dir="ltr" placeholder="خالی = حفظ رمز فعلی" />
-      <small class="muted">اختیاری — با وارد کردن رمز جدید،{% if profile.pg_admin_username %} رمز پاسارگارد هم{% endif %} هم‌زمان عوض می‌شود</small>
+      <small class="muted">اختیاری — با وارد کردن رمز جدید،{% if profile.pg_admin_username %} رمز S-UI هم{% endif %} هم‌زمان عوض می‌شود</small>
     </label>
     {% endif %}
 
     {% if profile.pg_admin_username %}
-    <label class="form-field">کلید API پاسارگارد
+    <label class="form-field">کلید API S-UI
       <input name="pg_api_key" type="password" autocomplete="new-password" dir="ltr"
-        placeholder="{% if pg_api_key_ready %}خالی بماند تا کلید فعلی حفظ شود{% else %}اختیاری — کلید API از پنل پاسارگارد{% endif %}" />
+        placeholder="{% if pg_api_key_ready %}خالی بماند تا کلید فعلی حفظ شود{% else %}اختیاری — کلید API از پنل S-UI{% endif %}" />
       <small class="muted">
         ترجیح بر رمز برای فراخوانی API (هدر <code dir="ltr">X-Api-Key</code>).
-        کلید را در پاسارگارد بسازید و فقط یک‌بار اینجا ذخیره کنید.
+        کلید را در S-UI بسازید و فقط یک‌بار اینجا ذخیره کنید.
         {% if pg_api_key_ready %}<span class="badge approved">کلید API ذخیره‌شده</span>{% endif %}
       </small>
     </label>
@@ -125,7 +125,7 @@
 
     <div class="ui-switch-list">
       {{ switch('is_active', 'نماینده فعال', checked=profile.is_active) }}
-      {{ switch('share_pg_panel_url', 'ارسال لینک پنل پاسارگارد', checked=profile.share_pg_panel_url, help='اگر خاموش باشد، فقط وب‌پنل ربات برای مدیریت استفاده می‌شود') }}
+      {{ switch('share_pg_panel_url', 'ارسال لینک پنل S-UI', checked=profile.share_pg_panel_url, help='اگر خاموش باشد، فقط وب‌پنل ربات برای مدیریت استفاده می‌شود') }}
       {% if owner_can_toggle_oversell and not is_payg %}
       <input type="hidden" name="volume_oversell_shown" value="1" />
       {{ switch('allow_volume_oversell', 'اجازه فروش بیش از سقف حجم', checked=profile.allow_volume_oversell, help='اگر خاموش باشد، مجموع حجم سرویس‌های فروشگاه از سقف اشتراک بیشتر نمی‌شود. نماینده‌ای که اشتراک یا سقف حجم ندارد محدود نمی‌شود.') }}
@@ -142,7 +142,7 @@
 {% from "_pg_quota_gauges.html" import pg_quota_gauge %}
 <section class="edit-section">
   <header class="edit-section-head">
-    <h3>مصرف و محدودیت پاسارگارد</h3>
+    <h3>مصرف و محدودیت S-UI</h3>
     <p class="muted">حجم و تعداد کاربران نماینده به‌همراه سقف‌های نقش/ادمین</p>
   </header>
   {% if pg_limits.username %}
@@ -172,7 +172,7 @@
 <section class="edit-section">
   <header class="edit-section-head">
     <h3>تغییر ظرفیت اشتراک</h3>
-    <p class="muted">تنظیم رایگان روز/حجم اشتراک پاسارگارد (مثبت = افزایش، منفی = کاهش)</p>
+    <p class="muted">تنظیم رایگان روز/حجم اشتراک S-UI (مثبت = افزایش، منفی = کاهش)</p>
   </header>
   <ul class="payg-meta">
     <li>
@@ -193,7 +193,7 @@
       <span class="payg-meta-value num-ratio">{{ pg_subscription.alloc_ratio_text }}</span>
     </li>
     <li>
-      <span class="payg-meta-label">ساخته‌شده مستقیم در پاسارگارد</span>
+      <span class="payg-meta-label">ساخته‌شده مستقیم در S-UI</span>
       <span class="payg-meta-value num-ratio">{{ pg_subscription.alloc_external_text }}</span>
     </li>
     <li>
@@ -215,7 +215,7 @@
     </li>
     {% if pg_subscription.can_sync %}
     <li>
-      <span class="payg-meta-label">سقف فعلی در پاسارگارد</span>
+      <span class="payg-meta-label">سقف فعلی در S-UI</span>
       <span class="payg-meta-value num-ratio">{{ pg_subscription.live_gb_text }} · {{ pg_subscription.live_users_text }}</span>
     </li>
     {% endif %}
@@ -224,7 +224,7 @@
   <div class="flash warn">تخصیص حجم این نماینده از سقف بیشتر است. افزایش حجم تا کاهش یا حذف سرویس‌ها مسدود است.</div>
   {% endif %}
   {% if pg_subscription.alloc_external_stale %}
-  <div class="flash warn">کاربرانی که مستقیم در پاسارگارد ساخته شده‌اند مدتی است شمرده نشده‌اند؛ آخرین مقدار شمرده‌شده حساب می‌شود. اتصال پنل را بررسی کنید.</div>
+  <div class="flash warn">کاربرانی که مستقیم در S-UI ساخته شده‌اند مدتی است شمرده نشده‌اند؛ آخرین مقدار شمرده‌شده حساب می‌شود. اتصال پنل را بررسی کنید.</div>
   {% endif %}
   {% if pg_subscription.alloc_uncapped_children %}
   <div class="flash warn">
@@ -248,14 +248,14 @@
   {% endif %}
   {% if pg_subscription.can_sync %}
   {% if pg_subscription.differs %}
-  <div class="flash warn">ظرفیت ثبت‌شده با سقف فعلی ادمین در پاسارگارد یکی نیست. اگر سقف پاسارگارد درست است، «همگام‌سازی از پاسارگارد» را بزنید.</div>
+  <div class="flash warn">ظرفیت ثبت‌شده با سقف فعلی ادمین در S-UI یکی نیست. اگر سقف S-UI درست است، «همگام‌سازی از S-UI» را بزنید.</div>
   {% endif %}
   <form method="post" action="/resellers/{{ user.id }}/subscription/sync" class="form-stack"
-        data-confirm="ظرفیت ثبت‌شده این نماینده برابر سقف فعلی ادمین در پاسارگارد شود؟ چیزی در پاسارگارد تغییر نمی‌کند."
+        data-confirm="ظرفیت ثبت‌شده این نماینده برابر سقف فعلی ادمین در S-UI شود؟ چیزی در S-UI تغییر نمی‌کند."
         data-confirm-title="همگام‌سازی ظرفیت"
         data-confirm-label="همگام‌سازی">
     <div class="actions">
-      <button class="btn btn-ghost btn-sm" type="submit">همگام‌سازی از پاسارگارد</button>
+      <button class="btn btn-ghost btn-sm" type="submit">همگام‌سازی از S-UI</button>
     </div>
   </form>
   {% endif %}
@@ -319,7 +319,7 @@
   <p class="muted payg-help">مصرف ترافیک از کیف پول فروشگاه نماینده کم می‌شود و افزایش یا کاهش دستی هم روی همان کیف پول اعمال می‌شود؛ موجودی منفی مجاز نیست. ستون «مانده» موجودی بعد از هر تراکنش است.</p>
   {% from "_wallet_adjust_form.html" import wallet_adjust_form %}
   {{ wallet_adjust_form('/resellers/' ~ user.id ~ '/billing-topup',
-       'موجودی کیف پول این نماینده تغییر کند؟ اگر با کاهش موجودی صفر شود، ادمین پاسارگارد نماینده و همهٔ کاربرانش همان لحظه قطع می‌شوند.',
+       'موجودی کیف پول این نماینده تغییر کند؟ اگر با کاهش موجودی صفر شود، ادمین S-UI نماینده و همهٔ کاربرانش همان لحظه قطع می‌شوند.',
        nonce=topup_nonce, amount_value=(min_unsuspend or ''), note_max=200,
        hint=(('حداقل شارژ برای رفع مسدودی: ' ~ (min_unsuspend | money) ~ ' تومان (۲× آستانه هشدار)') if min_unsuspend else none)) }}
   {% if wallet_txs %}
@@ -371,11 +371,11 @@
 <section class="edit-section">
   <header class="edit-section-head">
     <h3>حذف نمایندگی</h3>
-    <p class="muted">پروفایل نماینده و ادمین پاسارگارد او حذف می‌شود و نقشش به «کاربر» برمی‌گردد. علت برای او در تلگرام فرستاده می‌شود.</p>
+    <p class="muted">پروفایل نماینده و ادمین S-UI او حذف می‌شود و نقشش به «کاربر» برمی‌گردد. علت برای او در تلگرام فرستاده می‌شود.</p>
   </header>
   <form method="post" action="/resellers/{{ user.id }}/delete" class="form-stack"
-        data-confirm="نمایندگی و ادمین پاسارگارد متصل حذف شوند؟ علت برای کاربر ارسال می‌شود."
-        data-confirm-title="حذف نمایندگی (+ ادمین پاسارگارد)"
+        data-confirm="نمایندگی و ادمین S-UI متصل حذف شوند؟ علت برای کاربر ارسال می‌شود."
+        data-confirm-title="حذف نمایندگی (+ ادمین S-UI)"
         data-confirm-danger="1"
         data-confirm-reason="1"
         data-confirm-reason-label="علت حذف نمایندگی"
@@ -389,14 +389,14 @@
 <section class="edit-section">
   <header class="edit-section-head">
     <h3>حذف کامل کاربر</h3>
-    <p class="muted">حساب، نمایندگی، ادمین پاسارگارد و همهٔ سفارش‌ها، سرویس‌ها، پرداخت‌ها و تیکت‌های او حذف می‌شود و برگشت ندارد. اگر دوباره به ربات پیام بدهد، حساب خالی جدیدی ساخته می‌شود.</p>
+    <p class="muted">حساب، نمایندگی، ادمین S-UI و همهٔ سفارش‌ها، سرویس‌ها، پرداخت‌ها و تیکت‌های او حذف می‌شود و برگشت ندارد. اگر دوباره به ربات پیام بدهد، حساب خالی جدیدی ساخته می‌شود.</p>
   </header>
   {% if (user.wallet_balance or 0) > 0 %}
   <div class="flash warn">موجودی کیف پول: <span dir="ltr">{{ user.wallet_balance | money }}</span> تومان — با حذف کامل از بین می‌رود.</div>
   {% endif %}
   <form method="post" action="/resellers/{{ user.id }}/delete-user" class="form-stack"
-        data-confirm="{% if (user.wallet_balance or 0) > 0 %}هشدار: موجودی کیف پول {{ user.wallet_balance | money }} تومان از بین می‌رود. {% endif %}کاربر کامل به‌همراه نمایندگی، ادمین پاسارگارد، سفارش‌ها و سرویس‌ها حذف شود؟ برگشت‌ناپذیر است. توجه: اگر دوباره به ربات پیام بدهد، حساب جدید (خالی) برای همان تلگرام ساخته می‌شود."
-        data-confirm-title="حذف کامل (+ ادمین پاسارگارد)"
+        data-confirm="{% if (user.wallet_balance or 0) > 0 %}هشدار: موجودی کیف پول {{ user.wallet_balance | money }} تومان از بین می‌رود. {% endif %}کاربر کامل به‌همراه نمایندگی، ادمین S-UI، سفارش‌ها و سرویس‌ها حذف شود؟ برگشت‌ناپذیر است. توجه: اگر دوباره به ربات پیام بدهد، حساب جدید (خالی) برای همان تلگرام ساخته می‌شود."
+        data-confirm-title="حذف کامل (+ ادمین S-UI)"
         data-confirm-danger="1"
         {% if (user.wallet_balance or 0) > 0 %}data-confirm-warn="1"{% endif %}
         data-confirm-reason="1"

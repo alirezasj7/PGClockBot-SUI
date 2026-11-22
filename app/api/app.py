@@ -20,8 +20,6 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.config import (
     DATA_DIR,
     get_settings,
-    normalize_pg_base_url,
-    normalize_pg_subscription_path,
 )
 from app.db.models import (
     BotUser,
@@ -69,7 +67,6 @@ from app.services.setup_wizard import (
     prepare_sui_env_update,
     resolve_bot_update_mode,
     setup_finish_login_url,
-    setup_pg_access_audit,
     wizard_panel_url_hint,
     parse_admin_ids,
     revoke_setup_gate,
@@ -79,8 +76,6 @@ from app.services.setup_wizard import (
     update_env_keys,
 )
 from app.services.security_policy import (
-    UnsafePgUrlError,
-    assert_safe_pg_base_url,
     PUBLIC_FORM_MAX_BODY_BYTES,
     content_length_ok,
     request_host_allowed,
@@ -867,6 +862,8 @@ def create_api_app(lifespan=None) -> FastAPI:
             request: Request,
             session: AsyncSession = Depends(get_db),
         ) -> dict:
+            if perm not in {"pg_overview", "pg_users", "pg_inbounds"}:
+                raise HTTPException(404)
             from app.services.authz import authz_from_staff, can_pg_page, is_platform_admin
             from app.services.pg_read import effective_pg_menu_keys
             from app.services.principal_pg_authz import (
@@ -1694,7 +1691,6 @@ def create_api_app(lifespan=None) -> FastAPI:
         err: str | None = None,
         ok: str | None = None,
         show_done: bool = False,
-        pg_audit: dict | None = None,
     ):
         begin_setup()
         values = current_setup_values()
@@ -1703,8 +1699,6 @@ def create_api_app(lifespan=None) -> FastAPI:
         has_bot_token = bool((values.get("BOT_TOKEN") or "").strip()) and not is_placeholder_bot_token(
             values.get("BOT_TOKEN")
         )
-        has_pg_password = bool((values.get("PG_PASSWORD") or "").strip())
-        has_pg_api_key = bool((values.get("PG_API_KEY") or "").strip())
         has_sui_api_token = bool((values.get("SUI_API_TOKEN") or "").strip())
         # Never echo live secrets back into the HTML source — a re-run of the
         # wizard (e.g. to change one unrelated field) must not require
@@ -1713,22 +1707,13 @@ def create_api_app(lifespan=None) -> FastAPI:
         # previous-value logic lives in setup_bot()/setup_other().
         display_values = dict(values)
         display_values["BOT_TOKEN"] = ""
-        display_values["PG_PASSWORD"] = ""
-        display_values["PG_API_KEY"] = ""
         display_values["SUI_API_TOKEN"] = ""
-        if pg_audit is None and (show_done or step >= 4) and values.get("PANEL_BACKEND") != "sui":
-            try:
-                pg_audit = await setup_pg_access_audit()
-            except Exception:
-                pg_audit = None
         return render(
             request,
             "setup.html",
             {
                 "values": display_values,
                 "has_bot_token": has_bot_token,
-                "has_pg_password": has_pg_password,
-                "has_pg_api_key": has_pg_api_key,
                 "has_sui_api_token": has_sui_api_token,
                 "initial_step": step,
                 "show_done": show_done,
@@ -1738,7 +1723,6 @@ def create_api_app(lifespan=None) -> FastAPI:
                 "finish_login_url": setup_finish_login_url(),
                 "https_ready": _setup_https_ready(),
                 "bot_username": (values.get("BOT_USERNAME") or "").lstrip("@"),
-                "pg_audit": pg_audit,
             },
         )
 
@@ -1829,13 +1813,6 @@ def create_api_app(lifespan=None) -> FastAPI:
     @app.post("/setup/other")
     async def setup_other(
         request: Request,
-        panel_backend: str = Form("pasarguard"),
-        pg_base_url: str = Form(...),
-        pg_subscription_path: str = Form("/sub"),
-        pg_username: str = Form(""),
-        pg_password: str = Form(""),
-        pg_api_key: str = Form(""),
-        clear_pg_api_key: str = Form(""),
         sui_base_url: str = Form(""),
         sui_api_token: str = Form(""),
         sui_subscription_base_url: str = Form(""),
@@ -1855,121 +1832,27 @@ def create_api_app(lifespan=None) -> FastAPI:
                 return JSONResponse({"ok": False, "error": "راه‌اندازی قبلاً کامل شده است"}, status_code=400)
             return RedirectResponse("/", status_code=303)
         begin_setup()
-
-        backend = (panel_backend or "pasarguard").strip().lower().replace("_", "-")
-        if backend in {"sui", "s-ui"}:
-            try:
-                current_vals = current_setup_values()
-                env_update = await prepare_sui_env_update(
-                    base_url=sui_base_url,
-                    api_token=sui_api_token,
-                    subscription_base_url=sui_subscription_base_url,
-                    inbound_ids=sui_inbound_ids,
-                    admin_username=sui_admin_username,
-                    current_api_token=current_vals.get("SUI_API_TOKEN", ""),
-                    web_port=web_port,
-                    public_base_url=public_base_url,
-                    currency=currency,
-                )
-            except ValueError as exc:
-                return await fail(str(exc))
-            ensure_web_secret()
-            update_env_keys(env_update)
-            get_settings.cache_clear()
-            from app.services.pasarguard import reset_pg
-
-            reset_pg()
-            if _setup_wants_json(request):
-                return JSONResponse({"ok": True, "next": "/setup?step=4"})
-            return RedirectResponse("/setup?step=4", status_code=303)
-
+        current_vals = current_setup_values()
         try:
-            sub_path = normalize_pg_subscription_path(pg_subscription_path)
+            env_update = await prepare_sui_env_update(
+                base_url=sui_base_url,
+                api_token=sui_api_token,
+                subscription_base_url=sui_subscription_base_url,
+                inbound_ids=sui_inbound_ids,
+                admin_username=sui_admin_username,
+                current_api_token=current_vals.get("SUI_API_TOKEN", ""),
+                web_port=web_port,
+                public_base_url=public_base_url,
+                currency=currency,
+            )
         except ValueError as exc:
             return await fail(str(exc))
-        base = normalize_pg_base_url((pg_base_url or "").strip())
-        if not base:
-            return await fail("آدرس پاسارگارد الزامی است.")
-        try:
-            base = await asyncio.to_thread(assert_safe_pg_base_url, base)
-        except UnsafePgUrlError as exc:
-            return await fail(str(exc))
-        if not (pg_username or "").strip():
-            return await fail("نام کاربری پاسارگارد الزامی است.")
-        current_vals = current_setup_values()
-        clear_key = str(clear_pg_api_key or "").strip().lower() in {
-            "1",
-            "on",
-            "true",
-            "yes",
-        }
-        raw_key = (pg_api_key or "").replace("\r", "").strip()
-        if clear_key:
-            resolved_api_key = ""
-        elif raw_key:
-            if len(raw_key) < 16:
-                return await fail(
-                    "کلید API پاسارگارد کوتاه است — مقدار کامل را از پنل پاسارگارد کپی کنید."
-                )
-            resolved_api_key = raw_key
-        else:
-            # Empty = keep previously saved key (never echoed in HTML).
-            resolved_api_key = (current_vals.get("PG_API_KEY") or "").strip()
-        if not (pg_password or "").strip():
-            # Wizard never re-displays the saved password (see _setup_page) —
-            # an empty submit here means "keep the existing one".
-            existing_pw = (current_vals.get("PG_PASSWORD") or "").strip()
-            if existing_pw:
-                pg_password = existing_pw
-            elif not resolved_api_key:
-                return await fail(
-                    "رمز یا کلید API پاسارگارد الزامی است "
-                    "(حداقل یکی برای ادمین متصل)."
-                )
-        port = (web_port or "9000").strip()
-        try:
-            port_n = int(port)
-            if port_n < 1 or port_n > 65535:
-                raise ValueError
-        except ValueError:
-            return await fail("پورت وب نامعتبر است.")
-        # Hybrid: probe credentials + role before saving (fail closed on bad login).
-        from app.services.pg_access import (
-            clear_platform_pg_capability_cache,
-            resolve_platform_pg_capabilities,
-        )
-
-        caps = await resolve_platform_pg_capabilities(
-            username=(pg_username or "").strip(),
-            password=(pg_password or "").strip() or None,
-            api_key=resolved_api_key or None,
-            base_url=base,
-            use_cache=False,
-        )
-        if not caps.get("ok"):
-            detail = caps.get("error") or "نامعتبر"
-            return await fail(
-                f"ورود به پاسارگارد ناموفق بود: {detail}. "
-                "علت محتمل: آدرس، نام کاربری، رمز یا کلید API اشتباه. "
-                "راه حل: اعتبارنامه همان ادمین متصل در پاسارگارد را وارد کنید "
-                "(لزوماً owner پاسارگارد نیست)."
-            )
         ensure_web_secret()
-        pub = (public_base_url or "").strip().rstrip("/")
-        if pub.startswith("https://"):
-            pub = "http://" + pub[len("https://") :]
-        env_update: dict[str, str | int | None] = {
-            "PG_BASE_URL": base,
-            "PG_SUBSCRIPTION_PATH": sub_path,
-            "PG_USERNAME": (pg_username or "").strip(),
-            "PG_PASSWORD": (pg_password or "").strip(),
-            "PG_API_KEY": resolved_api_key,
-            "WEB_PORT": str(port_n),
-            "PUBLIC_BASE_URL": pub,
-            "CURRENCY": (currency or "").strip() or "تومان",
-        }
         update_env_keys(env_update)
-        clear_platform_pg_capability_cache()
+        get_settings.cache_clear()
+        from app.services.pasarguard import reset_pg
+
+        reset_pg()
         if _setup_wants_json(request):
             return JSONResponse({"ok": True, "next": "/setup?step=4"})
         return RedirectResponse("/setup?step=4", status_code=303)
@@ -2305,7 +2188,7 @@ def create_api_app(lifespan=None) -> FastAPI:
                             request,
                             "login.html",
                             {
-                                "error": "نقش پاسارگارد این ادمین هیچ دسترسی قابل‌نمایشی در وب‌پنل ندارد.",
+                                "error": "نقش S-UI این ادمین هیچ دسترسی قابل‌نمایشی در وب‌پنل ندارد.",
                                 "username": typed_user,
                             },
                             status_code=400,
@@ -2765,7 +2648,7 @@ def create_api_app(lifespan=None) -> FastAPI:
             tpl = int(pg_template_id) if str(pg_template_id).strip() else None
             if not tpl:
                 return RedirectResponse(
-                    f"/plans?err={quote('تمپلیت پاسارگارد را انتخاب کنید')}",
+                    f"/plans?err={quote('تمپلیت S-UI را انتخاب کنید')}",
                     status_code=303,
                 )
             if not template_allowed_for_staff(staff, tpl):
@@ -2777,7 +2660,7 @@ def create_api_app(lifespan=None) -> FastAPI:
             ids = parse_group_ids_from_form(form)
             if not ids:
                 return RedirectResponse(
-                    f"/plans?err={quote('حداقل یک گروه پاسارگارد انتخاب کنید')}",
+                    f"/plans?err={quote('حداقل یک گروه S-UI انتخاب کنید')}",
                     status_code=303,
                 )
             if not groups_allowed_for_staff(staff, ids):
@@ -2789,7 +2672,7 @@ def create_api_app(lifespan=None) -> FastAPI:
             if also_create_template:
                 if not staff_can_create_pg_template(staff):
                     return RedirectResponse(
-                        f"/plans?err={quote('اجازه ساخت تمپلیت در پاسارگارد را ندارید')}",
+                        f"/plans?err={quote('اجازه ساخت تمپلیت در S-UI را ندارید')}",
                         status_code=303,
                     )
                 try:
@@ -2810,7 +2693,7 @@ def create_api_app(lifespan=None) -> FastAPI:
                         tpl = int(created["id"])
                 except Exception as e:
                     return RedirectResponse(
-                        f"/plans?err={quote(f'ساخت تمپلیت در پاسارگارد ناموفق: {e}')}",
+                        f"/plans?err={quote(f'ساخت تمپلیت در S-UI ناموفق: {e}')}",
                         status_code=303,
                     )
 
@@ -3235,7 +3118,7 @@ def create_api_app(lifespan=None) -> FastAPI:
             tpl = int(pg_template_id) if str(pg_template_id).strip() else None
             if not tpl:
                 return RedirectResponse(
-                    f"/plans/{plan_id}/edit?err={quote('تمپلیت پاسارگارد را انتخاب کنید')}",
+                    f"/plans/{plan_id}/edit?err={quote('تمپلیت S-UI را انتخاب کنید')}",
                     status_code=303,
                 )
             if not template_allowed_for_staff(staff, tpl):
@@ -3247,7 +3130,7 @@ def create_api_app(lifespan=None) -> FastAPI:
             ids = parse_group_ids_from_form(form)
             if not ids:
                 return RedirectResponse(
-                    f"/plans/{plan_id}/edit?err={quote('حداقل یک گروه پاسارگارد انتخاب کنید')}",
+                    f"/plans/{plan_id}/edit?err={quote('حداقل یک گروه S-UI انتخاب کنید')}",
                     status_code=303,
                 )
             if not groups_allowed_for_staff(staff, ids):
@@ -4604,81 +4487,6 @@ def create_api_app(lifespan=None) -> FastAPI:
         tab = (request.query_params.get("tab") or "welcome").strip()
         form = await request.form()
 
-        if tab == "pasarguard":
-            from fastapi.responses import JSONResponse
-
-            from app.services.pasarguard import reset_pg
-            from app.services.pg_access import clear_platform_pg_capability_cache, resolve_platform_pg_capabilities
-            from app.services.setup_wizard import current_setup_values
-
-            ajax = str(form.get("ajax") or "") == "1"
-            action = str(form.get("action") or "save")
-
-            def pg_result(ok: bool, message: str, *, code: int = 200):
-                if ajax:
-                    return JSONResponse({"ok": ok, "message" if ok else "error": message}, status_code=code)
-                return RedirectResponse("/settings?tab=pasarguard&" + ("ok=" if ok else "err=") + quote(message), status_code=303)
-
-            if action not in {"save", "test"}:
-                return pg_result(False, "عملیات نامعتبر است", code=400)
-            current = current_setup_values()
-            try:
-                base = await asyncio.to_thread(assert_safe_pg_base_url, str(form.get("PG_BASE_URL") or ""))
-                sub_path = normalize_pg_subscription_path(str(form.get("PG_SUBSCRIPTION_PATH") or "/sub"))
-            except (ValueError, UnsafePgUrlError) as exc:
-                return pg_result(False, str(exc), code=400)
-            username = str(form.get("PG_USERNAME") or "").strip()
-            password = str(form.get("PG_PASSWORD") or "").strip() or current.get("PG_PASSWORD", "")
-            clear_key = str(form.get("clear_pg_api_key") or "").strip().lower() in {
-                "1", "on", "true", "yes",
-            }
-            raw_key = str(form.get("PG_API_KEY") or "").replace("\r", "").strip()
-            if clear_key:
-                api_key = ""
-            elif raw_key:
-                if len(raw_key) < 16:
-                    return pg_result(
-                        False,
-                        "کلید API پاسارگارد کوتاه است — مقدار کامل را از پنل پاسارگارد کپی کنید",
-                        code=400,
-                    )
-                api_key = raw_key
-            else:
-                api_key = (current.get("PG_API_KEY") or "").strip()
-            if not username or not (password or api_key):
-                return pg_result(
-                    False,
-                    "نام کاربری و (رمز یا کلید API) الزامی است؛ فیلد خالی مقدار فعلی را حفظ می‌کند",
-                    code=400,
-                )
-            if action == "test":
-
-                try:
-                    caps = await asyncio.wait_for(resolve_platform_pg_capabilities(
-                        username=username,
-                        password=password or None,
-                        api_key=api_key or None,
-                        base_url=base,
-                        use_cache=False,
-                    ), timeout=8.0)
-                except Exception:
-                    return pg_result(False, "پنل در زمان مقرر پاسخ نداد؛ آدرس و اتصال پنل را بررسی کنید", code=502)
-                if not caps.get("ok"):
-                    return pg_result(
-                        False,
-                        "اتصال پاسارگارد ناموفق بود؛ آدرس، نام کاربری، رمز یا کلید API را بررسی کنید",
-                        code=400,
-                    )
-                return pg_result(True, f"اتصال پاسارگارد موفق است؛ مسیر سابسکریپشن: {sub_path}/")
-            update_env_keys({
-                "PG_BASE_URL": base, "PG_SUBSCRIPTION_PATH": sub_path,
-                "PG_USERNAME": username, "PG_PASSWORD": password,
-                "PG_API_KEY": api_key,
-            })
-            get_settings.cache_clear()
-            reset_pg()
-            clear_platform_pg_capability_cache()
-            return pg_result(True, "تنظیمات اتصال پاسارگارد ذخیره و اعمال شد")
 
         if tab == "ssl":
             from app.services.ssl_certs import (
@@ -4801,18 +4609,6 @@ def create_api_app(lifespan=None) -> FastAPI:
             token = str(form.get("BOT_TOKEN") or "").strip()
             uname = str(form.get("BOT_USERNAME") or "").strip().lstrip("@")
             ids_raw = str(form.get("ADMIN_IDS") or "").strip()
-            pg_base = normalize_pg_base_url(str(form.get("PG_BASE_URL") or "").strip())
-            if pg_base:
-                try:
-                    pg_base = await asyncio.to_thread(assert_safe_pg_base_url, pg_base)
-                except UnsafePgUrlError as exc:
-                    return _bot_err(str(exc))
-            pg_user = str(form.get("PG_USERNAME") or "").strip()
-            pg_pass = str(form.get("PG_PASSWORD") or "").strip()
-            clear_pg_key = str(form.get("clear_pg_api_key") or "").strip().lower() in {
-                "1", "on", "true", "yes",
-            }
-            pg_api_key_raw = str(form.get("PG_API_KEY") or "").replace("\r", "").strip()
             update_mode_raw = str(form.get("BOT_UPDATE_MODE") or "").strip().lower()
             webhook_url_raw = str(form.get("WEBHOOK_URL") or "").strip()
             webhook_path_raw = str(form.get("WEBHOOK_PATH") or "").strip()
@@ -4821,33 +4617,15 @@ def create_api_app(lifespan=None) -> FastAPI:
             web_port = str(current.get("WEB_PORT") or "9000").strip()
             public_base = str(current.get("PUBLIC_BASE_URL") or "").strip().rstrip("/")
             currency = str(current.get("CURRENCY") or "تومان").strip() or "تومان"
-            try:
-                pg_sub_path = normalize_pg_subscription_path(
-                    str(form.get("PG_SUBSCRIPTION_PATH") or current.get("PG_SUBSCRIPTION_PATH") or "/sub")
-                )
-            except ValueError as exc:
-                return _bot_err(str(exc))
-            if not token:
-                token = (current.get("BOT_TOKEN") or "").strip()
-            if not pg_pass:
-                pg_pass = (current.get("PG_PASSWORD") or "").strip()
-            if clear_pg_key:
-                pg_api_key = ""
-            elif pg_api_key_raw:
-                if len(pg_api_key_raw) < 16:
-                    return _bot_err(
-                        "کلید API پاسارگارد کوتاه است — مقدار کامل را از پنل پاسارگارد کپی کنید"
-                    )
-                pg_api_key = pg_api_key_raw
-            else:
-                pg_api_key = (current.get("PG_API_KEY") or "").strip()
-            if not token or not uname or not ids_raw or not pg_base or not pg_user or not (
-                pg_pass or pg_api_key
-            ):
-                return _bot_err(
-                    "همه فیلدهای الزامی را پر کنید "
-                    "(برای پاسارگارد: نام کاربری + رمز یا کلید API)"
-                )
+            token = token or (current.get("BOT_TOKEN") or "").strip()
+            if not token or not uname or not ids_raw:
+                return _bot_err("توکن ربات، نام کاربری و آیدی ادمین لازم است")
+            sui_keys = (
+                "SUI_BASE_URL", "SUI_API_TOKEN", "SUI_SUBSCRIPTION_BASE_URL",
+                "SUI_INBOUND_IDS", "SUI_ADMIN_USERNAME",
+            )
+            sui = {key: str(form.get(key, current.get(key, "")) or "").strip() for key in sui_keys}
+            sui["SUI_API_TOKEN"] = sui["SUI_API_TOKEN"] or current.get("SUI_API_TOKEN", "")
             try:
                 ids = parse_admin_ids(ids_raw)
             except ValueError:
@@ -4875,11 +4653,7 @@ def create_api_app(lifespan=None) -> FastAPI:
                 "BOT_TOKEN": token,
                 "BOT_USERNAME": uname,
                 "ADMIN_IDS": admin_ids_norm,
-                "PG_BASE_URL": pg_base,
-                "PG_SUBSCRIPTION_PATH": pg_sub_path,
-                "PG_USERNAME": pg_user,
-                "PG_PASSWORD": pg_pass,
-                "PG_API_KEY": pg_api_key,
+                **sui,
                 "WEB_PORT": str(port_n),
                 "PUBLIC_BASE_URL": public_base,
                 "CURRENCY": currency,
@@ -4896,11 +4670,7 @@ def create_api_app(lifespan=None) -> FastAPI:
                 "BOT_TOKEN": str(current.get("BOT_TOKEN") or "").strip(),
                 "BOT_USERNAME": str(current.get("BOT_USERNAME") or "").strip().lstrip("@"),
                 "ADMIN_IDS": current_admin_ids,
-                "PG_BASE_URL": normalize_pg_base_url(str(current.get("PG_BASE_URL") or "").strip()),
-                "PG_SUBSCRIPTION_PATH": normalize_pg_subscription_path(current.get("PG_SUBSCRIPTION_PATH")),
-                "PG_USERNAME": str(current.get("PG_USERNAME") or "").strip(),
-                "PG_PASSWORD": str(current.get("PG_PASSWORD") or "").strip(),
-                "PG_API_KEY": str(current.get("PG_API_KEY") or "").strip(),
+                **{key: current.get(key, "") for key in sui_keys},
                 "WEB_PORT": str(current.get("WEB_PORT") or "9000").strip(),
                 "PUBLIC_BASE_URL": str(current.get("PUBLIC_BASE_URL") or "").strip().rstrip("/"),
                 "CURRENCY": str(current.get("CURRENCY") or "تومان").strip() or "تومان",
@@ -4950,6 +4720,22 @@ def create_api_app(lifespan=None) -> FastAPI:
                     )
                 return RedirectResponse("/settings?tab=bot&saved=1", status_code=303)
 
+            if any(payload[key] != current_norm[key] for key in sui_keys):
+                try:
+                    checked = await prepare_sui_env_update(
+                        base_url=sui["SUI_BASE_URL"],
+                        api_token=sui["SUI_API_TOKEN"],
+                        subscription_base_url=sui["SUI_SUBSCRIPTION_BASE_URL"],
+                        inbound_ids=sui["SUI_INBOUND_IDS"],
+                        admin_username=sui["SUI_ADMIN_USERNAME"],
+                        current_api_token=current.get("SUI_API_TOKEN", ""),
+                        web_port=str(port_n),
+                        public_base_url=public_base,
+                        currency=currency,
+                    )
+                except ValueError as exc:
+                    return _bot_err(str(exc))
+                payload.update({key: checked[key] for key in sui_keys})
             update_env_keys(payload)
             ensure_web_secret()
             get_settings.cache_clear()

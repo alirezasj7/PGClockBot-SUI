@@ -4,10 +4,10 @@
   <div class="home-update-copy">
     {% if last_good and last_good.age is not none %}
     <strong>آخرین اطلاعات دریافت‌شده نمایش داده می‌شود</strong>
-    <span class="muted">ارتباط با پاسارگارد کند یا قطع است. بخشی از اعداد این صفحه مربوط به حدود <bdi dir="ltr">{{ last_good.minutes }}</bdi> دقیقه پیش است و ممکن است به‌روز نباشد.</span>
+    <span class="muted">ارتباط با S-UI کند یا قطع است. بخشی از اعداد این صفحه مربوط به حدود <bdi dir="ltr">{{ last_good.minutes }}</bdi> دقیقه پیش است و ممکن است به‌روز نباشد.</span>
     {% else %}
-    <strong>اطلاعات پاسارگارد در دسترس نیست</strong>
-    <span class="muted">ارتباط با پاسارگارد کند یا قطع است. بقیهٔ بخش‌های پنل کار می‌کنند؛ کمی بعد دوباره تلاش کنید.</span>
+    <strong>اطلاعات S-UI در دسترس نیست</strong>
+    <span class="muted">ارتباط با S-UI کند یا قطع است. بقیهٔ بخش‌های پنل کار می‌کنند؛ کمی بعد دوباره تلاش کنید.</span>
     {% endif %}
   </div>
   <a class="btn btn-sm btn-ghost" href="{{ request.url.path.removesuffix('/body') }}">تلاش دوباره</a>

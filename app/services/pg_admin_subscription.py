@@ -90,7 +90,7 @@ class PgCapacityUnreadable(ValueError):
     """The admin's limits could not be read from PasarGuard, so no capacity may be recorded."""
 
 
-UNREADABLE_CAPACITY = "سقف حجم و کاربر این ادمین از پاسارگارد خوانده نشد؛ اتصال پنل را بررسی و دوباره تلاش کنید"
+UNREADABLE_CAPACITY = "سقف حجم و کاربر این ادمین از S-UI خوانده نشد؛ اتصال پنل را بررسی و دوباره تلاش کنید"
 
 
 async def read_live_pg_admin_capacity(pg_username: str) -> tuple[int, int]:
@@ -173,7 +173,7 @@ async def get_or_create_subscription(
 ) -> PgAdminSubscription:
     uname = normalize_pg_username(pg_username)
     if not uname:
-        raise ValueError("نام ادمین پاسارگارد نامعتبر است")
+        raise ValueError("نام ادمین S-UI نامعتبر است")
     sub = await get_subscription(session, uname)
     if sub:
         return sub
@@ -821,7 +821,7 @@ async def apply_addon_plan(
         await session.commit()
         if isinstance(e, ValueError) and str(e).strip():
             raise ValueError(str(e)) from e
-        raise ValueError("اعمال بسته در پاسارگارد ناموفق بود — مبلغ بازگردانده شد") from e
+        raise ValueError("اعمال بسته در S-UI ناموفق بود — مبلغ بازگردانده شد") from e
 
     await session.commit()
     return {
@@ -1013,11 +1013,11 @@ async def admin_adjust_reseller_subscription(
 
     uname = (getattr(profile, "pg_admin_username", None) or "").strip()
     if not uname:
-        raise ValueError("ادمین پاسارگارد برای این نماینده تنظیم نشده است")
+        raise ValueError("ادمین S-UI برای این نماینده تنظیم نشده است")
 
     sub = await get_subscription(session, uname)
     if sub is None:
-        raise ValueError("اشتراک پاسارگارد برای این نماینده یافت نشد")
+        raise ValueError("اشتراک S-UI برای این نماینده یافت نشد")
 
     now = _utcnow()
     if days_n != 0:
@@ -1055,7 +1055,7 @@ async def admin_adjust_reseller_subscription(
         await sync_pg_capacity_from_sub(session, sub)
     except Exception:
         logger.exception("admin adjust sync PG failed admin=%s", uname)
-        raise ValueError("همگام‌سازی ظرفیت پاسارگارد ناموفق بود") from None
+        raise ValueError("همگام‌سازی ظرفیت S-UI ناموفق بود") from None
 
     await session.commit()
     return {

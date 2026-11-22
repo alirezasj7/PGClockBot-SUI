@@ -38,7 +38,7 @@ PG_ACCESS_DENIED_MSG = (
 )
 # Phase 1F M3 — PG identity/authorization cannot be resolved safely.
 PG_UNAVAILABLE_MSG = (
-    "ارتباط با پاسارگارد برقرار نیست — تا برقراری ارتباط، ورود/دسترسی مسدود است."
+    "ارتباط با S-UI برقرار نیست — تا برقراری ارتباط، ورود/دسترسی مسدود است."
 )
 
 PgAdminGate = Literal["ok", "disabled", "missing", "unreachable"]
@@ -449,7 +449,7 @@ async def web_access_status_map(
                 is_active=bool(staff.is_active),
                 staff_id=int(staff.id),
                 note=staff.note,
-                detail="دسترسی وب ادمین پاسارگارد",
+                detail="دسترسی وب ادمین S-UI",
                 **flags,
             ).as_dict()
             continue
@@ -468,7 +468,7 @@ async def conflict_message_for_new_grant(
         return existing.detail or "این نام برای ادمین اصلی وب‌پنل رزرو است"
     if existing.source == "reseller":
         parts = [
-            "این ادمین پاسارگارد از قبل به یک نماینده متصل است و دسترسی وب‌پنل دارد یا خواهد داشت."
+            "این ادمین S-UI از قبل به یک نماینده متصل است و دسترسی وب‌پنل دارد یا خواهد داشت."
         ]
         if existing.web_username:
             parts.append(f"یوزر وب فعلی نماینده: «{existing.web_username}».")
@@ -501,15 +501,15 @@ async def conflict_message_for_reseller_link(
         exclude_profile_id is None or int(other.id) != int(exclude_profile_id)
     ):
         return (
-            f"ادمین پاسارگارد «{pg_u}» قبلاً به نماینده دیگری متصل است"
+            f"ادمین S-UI «{pg_u}» قبلاً به نماینده دیگری متصل است"
             f"{f' (یوزر وب: {other.web_username})' if other.web_username else ''}."
         )
     staff = await access_by_pg_username(session, pg_u)
     if staff is not None:
         return (
-            f"ادمین پاسارگارد «{pg_u}» قبلاً دسترسی وب‌پنل جداگانه دارد"
+            f"ادمین S-UI «{pg_u}» قبلاً دسترسی وب‌پنل جداگانه دارد"
             f" (یوزر: «{staff.web_username}»). "
-            "ابتدا آن دسترسی را از صفحه ادمین پاسارگارد حذف کنید، بعد نماینده را وصل کنید."
+            "ابتدا آن دسترسی را از صفحه ادمین S-UI حذف کنید، بعد نماینده را وصل کنید."
         )
     return None
 
@@ -536,7 +536,7 @@ async def _username_taken(
     if exclude_staff_id is not None:
         q = q.where(PgStaffAccess.id != int(exclude_staff_id))
     if (await session.execute(q)).scalar_one_or_none():
-        return "این نام کاربری قبلاً برای دسترسی وب ادمین پاسارگارد گرفته شده"
+        return "این نام کاربری قبلاً برای دسترسی وب ادمین S-UI گرفته شده"
     return None
 
 
@@ -545,10 +545,10 @@ def assert_web_matches_pg(web_username: str, pg_username: str) -> str | None:
     web = (web_username or "").strip().lower()
     pg = _norm_pg(pg_username)
     if not web or not pg:
-        return "نام کاربری وب و پاسارگارد الزامی است"
+        return "نام کاربری وب و S-UI الزامی است"
     if web != pg:
         return (
-            "برای ادمین فرعی، نام کاربری وب باید دقیقاً همان نام ادمین پاسارگارد باشد "
+            "برای ادمین فرعی، نام کاربری وب باید دقیقاً همان نام ادمین S-UI باشد "
             f"(«{pg}») — تغییر خودکار انجام نمی‌شود"
         )
     return None
@@ -566,7 +566,7 @@ async def grant_web_access(
     """Create a new PgStaffAccess only when no other web path exists."""
     pg_u = _norm_pg(pg_username)
     if not pg_u:
-        return None, "نام ادمین پاسارگارد الزامی است"
+        return None, "نام ادمین S-UI الزامی است"
     if not (password or "").strip():
         return None, "رمز عبور الزامی است"
 
@@ -596,19 +596,19 @@ async def grant_web_access(
     enc = encrypt_secret(password)
     if not enc:
         return None, (
-            "رمز‌گذاری رمز پاسارگارد ناموفق بود. "
+            "رمز‌گذاری رمز S-UI ناموفق بود. "
             "علت محتمل: کلید رمزنگاری پنل تنظیم نشده یا خراب است. "
             "راه حل: تنظیمات امنیتی سرور را بررسی کنید و دوباره تلاش کنید — "
-            "رمز پاسارگارد هنوز تغییر نکرده است."
+            "رمز S-UI هنوز تغییر نکرده است."
         )
     try:
         await get_pg().modify_admin(pg_u, {"password": password})
         reset_pg()
     except Exception as e:
         return None, (
-            f"همگام‌سازی رمز با پاسارگارد ناموفق بود: {e}. "
-            "علت محتمل: ارتباط با پاسارگارد یا رد شدن رمز توسط قوانین پنل. "
-            "راه حل: اتصال و قوانین رمز پاسارگارد را بررسی کنید و دوباره تلاش کنید."
+            f"همگام‌سازی رمز با S-UI ناموفق بود: {e}. "
+            "علت محتمل: ارتباط با S-UI یا رد شدن رمز توسط قوانین پنل. "
+            "راه حل: اتصال و قوانین رمز S-UI را بررسی کنید و دوباره تلاش کنید."
         )
 
     role_id = await resolve_pg_role_id_for_admin(pg_u)
@@ -705,7 +705,7 @@ async def update_web_access(
     if not pwd:
         # Keep existing password on edit — but not when no PG auth secret exists
         if not staff_has_pg_auth_secret(existing):
-            return None, "رمز عبور الزامی است — اعتبارنامه پاسارگارد ذخیره نشده"
+            return None, "رمز عبور الزامی است — اعتبارنامه S-UI ذخیره نشده"
     else:
         cleaned_tmp, _ = validate_web_username(web_username, lowercase=True)
         ok, err = validate_password_strength(
@@ -721,7 +721,7 @@ async def update_web_access(
     # D3 Q1 A: aligning a mismatched username requires explicit Owner confirmation
     if existing_web and existing_web != pg_u and cleaned == pg_u and not confirm_align:
         return None, (
-            f"نام کاربری وب («{existing_web}») با پاسارگارد («{pg_u}») یکی نیست. "
+            f"نام کاربری وب («{existing_web}») با S-UI («{pg_u}») یکی نیست. "
             "برای هم‌ترازسازی، گزینه تأیید را علامت بزنید — تغییر خودکار انجام نمی‌شود"
         )
 
@@ -740,19 +740,19 @@ async def update_web_access(
         enc = encrypt_secret(pwd)
         if not enc:
             return None, (
-                "رمز‌گذاری رمز پاسارگارد ناموفق بود. "
+                "رمز‌گذاری رمز S-UI ناموفق بود. "
                 "علت محتمل: کلید رمزنگاری پنل تنظیم نشده یا خراب است. "
                 "راه حل: تنظیمات امنیتی سرور را بررسی کنید و دوباره تلاش کنید — "
-                "رمز پاسارگارد هنوز تغییر نکرده است."
+                "رمز S-UI هنوز تغییر نکرده است."
             )
         try:
             await get_pg().modify_admin(pg_u, {"password": pwd})
             reset_pg()
         except Exception as e:
             return None, (
-                f"همگام‌سازی رمز با پاسارگارد ناموفق بود: {e}. "
-                "علت محتمل: ارتباط با پاسارگارد یا رد شدن رمز توسط قوانین پنل. "
-                "راه حل: اتصال و قوانین رمز پاسارگارد را بررسی کنید و دوباره تلاش کنید."
+                f"همگام‌سازی رمز با S-UI ناموفق بود: {e}. "
+                "علت محتمل: ارتباط با S-UI یا رد شدن رمز توسط قوانین پنل. "
+                "راه حل: اتصال و قوانین رمز S-UI را بررسی کنید و دوباره تلاش کنید."
             )
         existing.web_password_hash = hash_password(pwd)
         existing.pg_admin_password_enc = enc
@@ -848,7 +848,7 @@ def store_staff_pg_api_key(
     if not raw:
         return None  # empty = keep current
     if len(raw) < 16:
-        return "کلید API پاسارگارد کوتاه است — مقدار کامل را از پنل پاسارگارد کپی کنید"
+        return "کلید API S-UI کوتاه است — مقدار کامل را از پنل S-UI کپی کنید"
     enc = encrypt_secret(raw)
     if not enc:
         return (
@@ -1001,7 +1001,7 @@ async def change_staff_credentials(
     pg_u = _norm_pg(row.pg_username)
     if existing_web and pg_u and existing_web != pg_u:
         return None, (
-            "نام کاربری وب با پاسارگارد یکی نیست. "
+            "نام کاربری وب با S-UI یکی نیست. "
             "علت محتمل: حساب قدیمی قبل از یکپارچه‌سازی نام کاربری. "
             "راه حل: ادمین اصلی از بخش «ادمین‌ها» با تأیید هم‌ترازسازی، دسترسی ادمین فرعی را ویرایش کند."
         )
@@ -1018,19 +1018,19 @@ async def change_staff_credentials(
     enc = encrypt_secret(new_password)
     if not enc:
         return None, (
-            "رمز‌گذاری رمز پاسارگارد ناموفق بود. "
+            "رمز‌گذاری رمز S-UI ناموفق بود. "
             "علت محتمل: کلید رمزنگاری پنل تنظیم نشده یا خراب است. "
             "راه حل: تنظیمات امنیتی سرور را بررسی کنید و دوباره تلاش کنید — "
-            "رمز پاسارگارد هنوز تغییر نکرده است."
+            "رمز S-UI هنوز تغییر نکرده است."
         )
     try:
         await get_pg().modify_admin(row.pg_username, {"password": new_password})
         reset_pg()
     except Exception as e:
         return None, (
-            f"همگام‌سازی رمز با پاسارگارد ناموفق بود: {e}. "
-            "علت محتمل: ارتباط با پاسارگارد یا رد شدن رمز توسط قوانین پنل. "
-            "راه حل: اتصال و قوانین رمز پاسارگارد را بررسی کنید و دوباره تلاش کنید."
+            f"همگام‌سازی رمز با S-UI ناموفق بود: {e}. "
+            "علت محتمل: ارتباط با S-UI یا رد شدن رمز توسط قوانین پنل. "
+            "راه حل: اتصال و قوانین رمز S-UI را بررسی کنید و دوباره تلاش کنید."
         )
     row.web_username = cleaned
     row.web_password_hash = hash_password(new_password)

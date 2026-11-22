@@ -277,7 +277,7 @@
         {% if has_pg %}
         <div class="nav-section is-collapsed nav-section-pg" data-nav-mode="pg" id="nav-panel-pg">
           <button type="button" class="nav-label nav-label-pg nav-label-toggle" data-nav-collapse="pg" aria-expanded="false">
-            <span>پنل پاسارگارد</span>
+            <span>پنل S-UI</span>
             <svg class="nav-label-caret" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>
           </button>
           <p class="nav-empty muted">در این بخش آیتمی برای دسترسی شما نیست.</p>
@@ -291,36 +291,6 @@
           <a href="/pg/users" class="nav-item nav-item-pg {% if path.startswith('/pg/users') %}active{% endif %}">
             <svg class="nav-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M5 19a7 7 0 0 1 14 0"/></svg>
             <span>کاربران</span>
-          </a>
-          {% endif %}
-          {% if 'pg_admins' in pg_nav %}
-          <a href="/pg/admins" class="nav-item nav-item-pg {% if path.startswith('/pg/admins') %}active{% endif %}">
-            <svg class="nav-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.2 2.8 7.2 7 8.5 4.2-1.3 7-4.3 7-8.5V6l-7-3z"/></svg>
-            <span>ادمین</span>
-          </a>
-          {% endif %}
-          {% if 'pg_nodes' in pg_nav %}
-          <a href="/pg/nodes" class="nav-item nav-item-pg {% if path.startswith('/pg/nodes') %}active{% endif %}">
-            <svg class="nav-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="8.5" y="13" width="7" height="7" rx="1.5"/></svg>
-            <span>نود</span>
-          </a>
-          {% endif %}
-          {% if 'pg_groups' in pg_nav %}
-          <a href="/pg/groups" class="nav-item nav-item-pg {% if path.startswith('/pg/groups') %}active{% endif %}">
-            <svg class="nav-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v10H4z"/><path d="M8 7V5h8v2"/></svg>
-            <span>گروه</span>
-          </a>
-          {% endif %}
-          {% if 'pg_hosts' in pg_nav %}
-          <a href="/pg/hosts" class="nav-item nav-item-pg {% if path.startswith('/pg/hosts') %}active{% endif %}">
-            <svg class="nav-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/></svg>
-            <span>هاست</span>
-          </a>
-          {% endif %}
-          {% if 'pg_templates' in pg_nav %}
-          <a href="/pg/templates" class="nav-item nav-item-pg {% if path.startswith('/pg/templates') %}active{% endif %}">
-            <svg class="nav-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 12h8M8 15h5"/></svg>
-            <span>تمپلیت</span>
           </a>
           {% endif %}
           {% if 'pg_inbounds' in pg_nav %}
@@ -354,7 +324,7 @@
             {% elif ident.kind == 'l1' or ident.kind == 'l2' %}
             <span class="role-tag role-tag-principal">{{ ident.label }}</span>
             {% if ident.show_pg_role and ident.pg_role_name %}
-            <span class="identity-pg-role">نقش پاسارگارد: {{ ident.pg_role_name }}</span>
+            <span class="identity-pg-role">نقش S-UI: {{ ident.pg_role_name }}</span>
             {% endif %}
             {% if ident.chips %}
             <span class="identity-chips">
@@ -368,7 +338,7 @@
             {% elif is_reseller %}
             <span class="role-tag role-tag-reseller">نماینده</span>
             {% elif is_pg_staff %}
-            <span class="role-tag role-tag-pg">ادمین پاسارگارد</span>
+            <span class="role-tag role-tag-pg">ادمین S-UI</span>
             {% elif ident.label %}
             <span class="role-tag">{{ ident.label }}</span>
             {% endif %}

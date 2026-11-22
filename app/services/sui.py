@@ -7,6 +7,9 @@ leaving the original PasarGuard client and all of its UI available.
 
 from __future__ import annotations
 
+import asyncio
+import base64
+import binascii
 import json
 import logging
 import secrets
@@ -141,7 +144,7 @@ class SuiClient:
             except UnsafePgUrlError:
                 logger.error("Refusing unsafe S-UI base URL")
                 self.base_url = ""
-        self._api_base = f"{self.base_url}/apiv2" if self.base_url else ""
+        self._api_base = f"{self.base_url.removesuffix('/apiv2')}/apiv2" if self.base_url else ""
         self._api_token = (self.settings.sui_api_token or "").replace("\r", "").strip()
         self._client = http_client or httpx.AsyncClient(
             base_url=self._api_base,
@@ -178,7 +181,7 @@ class SuiClient:
             raise PasarGuardError("SUI_BASE_URL در .env تنظیم نشده است")
         if not self._api_token:
             raise PasarGuardError("SUI_API_TOKEN در .env تنظیم نشده است")
-        if any(char in self._api_token for char in {"\r", "\n"}):
+        if not self._api_token.isascii() or not self._api_token.isprintable():
             raise PasarGuardError("SUI_API_TOKEN نامعتبر است")
         return self._api_token
 
@@ -203,28 +206,25 @@ class SuiClient:
             )
         except httpx.HTTPError as exc:
             raise PasarGuardError("ارتباط با S-UI ناموفق بود") from exc
-        if response.status_code >= 400:
-            detail = (response.text or "")[:300]
-            raise PasarGuardError(
-                f"S-UI {method.upper()} {path} failed ({response.status_code})",
-                response.status_code,
-                detail,
-            )
-        if response.status_code == 204 or not response.content:
-            return None
+        if not 200 <= response.status_code < 300:
+            raise PasarGuardError("پاسخ HTTP ناموفق از S-UI", response.status_code)
         try:
             payload = response.json()
-        except (TypeError, ValueError):
-            return response.text
-        if isinstance(payload, dict) and "success" in payload:
-            if not bool(payload.get("success")):
-                raise PasarGuardError(
-                    str(payload.get("msg") or "S-UI request failed"),
-                    400,
-                    payload,
-                )
-            return payload.get("obj")
-        return payload
+        except ValueError as exc:
+            raise PasarGuardError("پاسخ API v2 به شکل JSON نیست", 502) from exc
+        if not isinstance(payload, dict) or not isinstance(payload.get("success"), bool):
+            raise PasarGuardError("پاسخ با قالب API v2 S-UI سازگار نیست", 502)
+        if not payload["success"]:
+            message = str(payload.get("msg") or "").casefold()
+            if "invalid token" in message or "expired token" in message:
+                raise PasarGuardError("توکن API v2 نامعتبر یا منقضی است", 401)
+            raise PasarGuardError("S-UI درخواست را رد کرد", 400)
+        return payload.get("obj")
+
+    async def check_connection(self) -> None:
+        result = await self.request("GET", "status", params={"r": "sys"})
+        if not isinstance(result, dict) or not isinstance(result.get("sys"), dict):
+            raise PasarGuardError("پاسخ وضعیت API v2 S-UI معتبر نیست", 502)
 
     @staticmethod
     def _rows(data: Any, key: str) -> list[dict[str, Any]]:
@@ -244,9 +244,10 @@ class SuiClient:
     async def _raw_user_by_id(self, user_id: int) -> dict[str, Any]:
         data = await self.request("GET", "clients", params={"id": str(int(user_id))})
         rows = self._rows(data, "clients")
-        if not rows:
-            raise PasarGuardError("کاربر در S-UI پیدا نشد", 404)
-        return rows[0]
+        for row in rows:
+            if _as_int(row.get("id")) == user_id:
+                return row
+        raise PasarGuardError("کاربر در S-UI پیدا نشد", 404)
 
     async def _raw_user_by_name(self, username: str) -> dict[str, Any]:
         wanted = (username or "").strip().lower()
@@ -272,6 +273,27 @@ class SuiClient:
                 netloc += ":2096"
             configured = urlunsplit((parsed.scheme, netloc, "/sub", "", ""))
         return f"{configured.rstrip('/')}/{quote(name, safe='')}"
+
+    async def direct_links(self, username: str) -> list[str]:
+        """Read direct configuration URIs from this client's subscription."""
+        name = self._validate_name(username)
+        url = self._subscription_url(name)
+        try:
+            response = await self._http().get(url, timeout=10.0)
+            response.raise_for_status()
+        except httpx.HTTPError as exc:
+            raise PasarGuardError("دریافت کانفیگ از S-UI ناموفق بود") from exc
+        body = response.text.strip()
+        if len(body) > 256_000:
+            raise PasarGuardError("پاسخ کانفیگ بیش از حد بزرگ است")
+        if "://" not in body:
+            try:
+                body = base64.b64decode(body + "=" * (-len(body) % 4), validate=True).decode("utf-8")
+            except (binascii.Error, UnicodeDecodeError, ValueError) as exc:
+                raise PasarGuardError("پاسخ کانفیگ معتبر نیست") from exc
+        allowed = ("hysteria2://", "hy2://", "vless://", "vmess://", "trojan://", "ss://", "tuic://")
+        return list(dict.fromkeys(line.strip() for line in body.splitlines()
+                                  if line.strip().lower().startswith(allowed)))
 
     def _to_pg_user(self, raw: dict[str, Any]) -> dict[str, Any]:
         name = str(raw.get("name") or "").strip()
@@ -449,7 +471,7 @@ class SuiClient:
     @staticmethod
     def _validate_name(value: Any) -> str:
         name = str(value or "").strip()
-        if not name or any(char in name for char in "\r\n?#\\"):
+        if not name or any(char.isspace() or char in "/?#\\" for char in name):
             raise PasarGuardError("نام کاربر برای لینک اشتراک نامعتبر است", 400)
         return name
 
@@ -482,7 +504,7 @@ class SuiClient:
             "nextReset": 0,
         }
 
-    async def _save_client(self, action: str, data: dict[str, Any] | int) -> Any:
+    async def _save_client(self, action: str, data: dict[str, Any]) -> Any:
         encoded = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
         return await self.request(
             "POST",
@@ -534,7 +556,7 @@ class SuiClient:
 
     async def delete_user_by_id(self, user_id: int) -> None:
         try:
-            await self._save_client("del", int(user_id))
+            await self._save_client("del", {"id": int(user_id)})
         except PasarGuardError as exc:
             if exc.status_code != 404:
                 raise
@@ -546,13 +568,10 @@ class SuiClient:
         return await self.get_user_by_id(int(user_id))
 
     async def revoke_sub_by_id(self, user_id: int) -> dict[str, Any]:
-        return await self.set_disabled_by_id(user_id, True)
+        raise PasarGuardError("تعویض لینک اشتراک برای این کلاینت پشتیبانی نمی‌شود", 501)
 
     async def reset_user_by_id(self, user_id: int) -> dict[str, Any]:
-        # S-UI's resetTraffic endpoint is global. Never call it for a single
-        # customer; renewal still updates the quota and expiry safely.
-        logger.warning("S-UI has no per-client traffic reset; user=%s was not reset", user_id)
-        return await self.get_user_by_id(int(user_id))
+        raise PasarGuardError("ریست مصرف یک کلاینت در S-UI پشتیبانی نمی‌شود", 501)
 
     async def set_owner_by_id(self, user_id: int, admin_username: str) -> dict[str, Any]:
         del admin_username
@@ -811,10 +830,20 @@ class SuiClient:
         last_good_ok: bool = False,
     ) -> dict[str, Any]:
         del cache_max_age, last_good_ok
-        data = await self.request(
-            "GET",
-            "status",
-            params={"r": "cpu,mem,net,sys,sbd"},
+        data, clients = await asyncio.gather(
+            self.request("GET", "status", params={"r": "cpu,mem,net,sys,sbd"}),
+            self.request("GET", "clients"),
         )
-        return data if isinstance(data, dict) else {"raw": data}
+        status = data if isinstance(data, dict) else {}
+        system = status.get("sys")
+        rows = self._rows(clients, "clients")
+        counts: dict[str, int | str] = {
+            "total_users": len(rows),
+            "users_active": sum(_status(row) == "active" for row in rows),
+            "users_disabled": sum(not row.get("enable", False) for row in rows),
+        }
+        version = system.get("appVersion") if isinstance(system, dict) else None
+        if isinstance(version, str) and version:
+            counts["version"] = version
+        return {**status, **counts}
 

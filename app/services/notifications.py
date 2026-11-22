@@ -1494,7 +1494,7 @@ ROLE_LABELS_FA: dict[str, str] = {
     "user": "کاربر",
     "reseller": "نماینده",
     "admin": "مدیر",
-    "pg_staff": "ادمین پاسارگارد",
+    "pg_staff": "ادمین S-UI",
 }
 
 _EVENT_TITLES_FA: dict[str, str] = {
@@ -1552,7 +1552,7 @@ def format_account_edit_subject(
         lines.append(kv_line("📌", "نقش قبلی", role_label_fa(old_role)))
         lines.append(kv_line("📌", "نقش جدید", role_label_fa(new_role)))
     elif event == "reseller_revoke":
-        lines.append("دسترسی پنل نماینده و ادمین پاسارگارد مرتبط لغو شده است.")
+        lines.append("دسترسی پنل نماینده و ادمین S-UI مرتبط لغو شده است.")
         lines.append("نقش شما به «کاربر» برگشت.")
     elif event == "user_delete":
         lines.append("حساب و داده‌های مرتبط شما از ربات حذف شد.")

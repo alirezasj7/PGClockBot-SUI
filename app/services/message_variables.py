@@ -40,7 +40,7 @@ DOMAIN_LABELS_FA: dict[str, str] = {
     DOMAIN_WALLET: "کیف پول",
     DOMAIN_REFERRAL: "دعوت دوستان",
     DOMAIN_FORCE_JOIN: "عضویت اجباری",
-    DOMAIN_NAMING: "نام‌گذاری پاسارگارد",
+    DOMAIN_NAMING: "نام‌گذاری S-UI",
     DOMAIN_QR: "کپشن QR",
     DOMAIN_DAILY_REPORT: "گزارش روزانه",
 }
@@ -294,7 +294,7 @@ _VARS: tuple[MessageVar, ...] = (
     MessageVar(
         key="prefix",
         title_fa="پیشوند نام کاربری",
-        description_fa="پیشوند الگوی ساخت یوزرنیم پاسارگارد.",
+        description_fa="پیشوند الگوی ساخت یوزرنیم S-UI.",
         example="clk",
         domains=frozenset({DOMAIN_NAMING}),
         html_escape=False,
@@ -339,7 +339,7 @@ _VARS: tuple[MessageVar, ...] = (
     MessageVar(
         key="id",
         title_fa="شناسه سفارش در نام",
-        description_fa="شناسهٔ سفارش داخل الگوی نام‌گذاری پاسارگارد.",
+        description_fa="شناسهٔ سفارش داخل الگوی نام‌گذاری S-UI.",
         example="1024",
         domains=frozenset({DOMAIN_NAMING}),
         html_escape=False,

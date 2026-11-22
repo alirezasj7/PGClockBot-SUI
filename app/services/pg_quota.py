@@ -150,9 +150,9 @@ def _admin_is_disabled(admin: dict) -> bool:
 def assert_admin_can_write(admin: dict | None, role: dict | None = None) -> None:
     """Block mutations when the PG admin is disabled or limited (PG write gate)."""
     if not isinstance(admin, dict) or not admin:
-        raise PgQuotaError("ادمین پاسارگارد برای این حساب یافت نشد")
+        raise PgQuotaError("ادمین S-UI برای این حساب یافت نشد")
     if _admin_is_disabled(admin):
-        raise PgQuotaError("حساب ادمین پاسارگارد شما غیرفعال است و امکان تغییر ندارید")
+        raise PgQuotaError("حساب ادمین S-UI شما غیرفعال است و امکان تغییر ندارید")
     if _admin_is_limited(admin):
         disabled_when = False
         for src in (role, admin.get("role") if isinstance(admin.get("role"), dict) else None):
@@ -322,7 +322,7 @@ async def _client_for_named_pg_admin(
             return await get_pg_for_reseller(session, int(reseller_user_id))
         if session is None:
             raise PgQuotaError(
-                "خواندن سقف پاسارگارد بدون اعتبارنامه این حساب ممکن نیست"
+                "خواندن سقف S-UI بدون اعتبارنامه این حساب ممکن نیست"
             )
         from sqlalchemy import func, select
 
@@ -344,7 +344,7 @@ async def _client_for_named_pg_admin(
     except PasarGuardError as e:
         raise PgQuotaError(e.user_message(fallback=str(e))) from e
     except Exception as e:
-        raise PgQuotaError(str(e) or "خواندن سقف پاسارگارد ناموفق بود") from e
+        raise PgQuotaError(str(e) or "خواندن سقف S-UI ناموفق بود") from e
 
 
 def _admin_username(admin: Mapping[str, Any] | None) -> str:
@@ -361,7 +361,7 @@ async def _load_admin_and_role(
 ) -> tuple[dict, dict | None]:
     expected = str(staff.get("pg_admin_username") or "").strip()
     if not expected:
-        raise PgQuotaError("ادمین پاسارگارد برای این حساب تنظیم نشده است")
+        raise PgQuotaError("ادمین S-UI برای این حساب تنظیم نشده است")
 
     pg = await _quota_pg_client(staff, session=session, client=client)
     admin = None
@@ -373,7 +373,7 @@ async def _load_admin_and_role(
         got = _admin_username(current)
         if got and got.lower() != expected.lower():
             raise PgQuotaError(
-                f"سقف پاسارگارد باید با حساب «{expected}» خوانده شود، نه «{got}»"
+                f"سقف S-UI باید با حساب «{expected}» خوانده شود، نه «{got}»"
             )
         if got and got.lower() == expected.lower():
             admin = current
@@ -386,12 +386,12 @@ async def _load_admin_and_role(
             got = _admin_username(fetched_admin)
             if got and got.lower() != expected.lower():
                 raise PgQuotaError(
-                    f"سقف پاسارگارد باید با حساب «{expected}» خوانده شود، نه «{got}»"
+                    f"سقف S-UI باید با حساب «{expected}» خوانده شود، نه «{got}»"
                 )
             if got and got.lower() == expected.lower():
                 admin = fetched_admin
     if not isinstance(admin, dict) or not admin:
-        raise PgQuotaError(f"ادمین «{expected}» در پاسارگارد یافت نشد")
+        raise PgQuotaError(f"ادمین «{expected}» در S-UI یافت نشد")
 
     role: dict | None = admin.get("role") if isinstance(admin.get("role"), dict) else None
     role_id = staff.get("pg_role_id")
@@ -741,7 +741,7 @@ async def assert_reseller_can_deliver(
     uname = str(pg_admin_username or "").strip()
     if not uname:
         raise PgQuotaError(
-            "ادمین پاسارگارد برای این فروشگاه تنظیم نشده است — تحویل ممکن نیست"
+            "ادمین S-UI برای این فروشگاه تنظیم نشده است — تحویل ممکن نیست"
         )
     staff = {
         "role": "reseller",
@@ -785,7 +785,7 @@ async def assert_reseller_can_renew(
     uname = str(pg_admin_username or "").strip()
     if not uname:
         raise PgQuotaError(
-            "ادمین پاسارگارد برای این فروشگاه تنظیم نشده است — تمدید ممکن نیست"
+            "ادمین S-UI برای این فروشگاه تنظیم نشده است — تمدید ممکن نیست"
         )
     staff = {
         "role": "reseller",

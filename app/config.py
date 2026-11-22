@@ -152,9 +152,10 @@ class Settings(BaseSettings):
     # Admin API key for the connected PG identity (X-Api-Key). Preferred over password.
     pg_api_key: str = Field(default="", alias="PG_API_KEY")
     pg_access_token: str = Field(default="", alias="PG_ACCESS_TOKEN")
-    # Additive panel adapter. ``pasarguard`` remains the default so existing
-    # installations keep their current behavior.
-    panel_backend: str = Field(default="pasarguard", alias="PANEL_BACKEND")
+    # The S-UI fork has one panel backend by design.  The legacy field remains
+    # readable for old .env files, but its value is never used to select a
+    # different panel.
+    panel_backend: str = Field(default="sui", alias="PANEL_BACKEND")
     sui_base_url: str = Field(default="", alias="SUI_BASE_URL")
     sui_api_token: str = Field(default="", alias="SUI_API_TOKEN")
     sui_subscription_base_url: str = Field(default="", alias="SUI_SUBSCRIPTION_BASE_URL")
@@ -283,8 +284,8 @@ class Settings(BaseSettings):
     @field_validator("panel_backend", mode="after")
     @classmethod
     def normalize_panel_backend(cls, value: str) -> str:
-        backend = (value or "pasarguard").strip().lower().replace("_", "-")
-        return "sui" if backend in {"sui", "s-ui"} else "pasarguard"
+        del value
+        return "sui"
 
     @field_validator("sui_base_url", "sui_subscription_base_url", mode="after")
     @classmethod

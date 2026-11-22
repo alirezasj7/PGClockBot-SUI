@@ -16,7 +16,7 @@ from app.config import get_settings
 from app.db.models import Plan
 from app.db.session import SessionLocal, init_db
 from app.jobs.scheduler import start_background_scheduler, start_scheduler, stop_scheduler
-from app.services.pasarguard import get_pg, is_sui_backend
+from app.services.pasarguard import get_pg
 from app.services.users import ensure_default_settings
 from app.services.web_auth import load_web_admin
 
@@ -179,15 +179,12 @@ def main() -> None:
                     logger.exception("Scheduler failed to start")
 
                 async def _pg_warmup() -> None:
-                    backend = "S-UI" if is_sui_backend() else "PasarGuard"
                     try:
-                        await get_pg().ensure_token()
-                        base = get_settings().sui_base_url if is_sui_backend() else get_settings().pg_base_url
-                        logger.info("%s panel connection OK · %s", backend, base)
+                        await get_pg().check_connection()
+                        logger.info("S-UI connection OK · %s", get_settings().sui_base_url)
                     except Exception:
                         logger.exception(
-                            "%s connection FAILED — check the selected panel settings in .env",
-                            backend,
+                            "S-UI connection FAILED — check SUI_BASE_URL and SUI_API_TOKEN",
                         )
 
                 pg_warmup_task = asyncio.create_task(_pg_warmup())

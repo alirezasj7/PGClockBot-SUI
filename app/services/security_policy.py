@@ -198,20 +198,20 @@ def assert_safe_pg_base_url(
 
     url = normalize_pg_base_url((raw or "").strip())
     if not url:
-        raise UnsafePgUrlError("آدرس پاسارگارد خالی است")
+        raise UnsafePgUrlError("آدرس S-UI خالی است")
     if pg_url_has_userinfo(raw) or pg_url_has_userinfo(url):
-        raise UnsafePgUrlError("آدرس پاسارگارد نباید شامل نام کاربری/رمز در URL باشد")
+        raise UnsafePgUrlError("آدرس S-UI نباید شامل نام کاربری/رمز در URL باشد")
 
     parsed = urlparse(url)
     if parsed.scheme not in {"http", "https"}:
-        raise UnsafePgUrlError("آدرس پاسارگارد باید http یا https باشد")
+        raise UnsafePgUrlError("آدرس S-UI باید http یا https باشد")
     host = (parsed.hostname or "").strip().lower()
     if not host:
-        raise UnsafePgUrlError("آدرس پاسارگارد نامعتبر است")
+        raise UnsafePgUrlError("آدرس S-UI نامعتبر است")
     if _hostname_blocked_for_pg(host):
         # localhost is blocked as hostname label; loopback IPs still allowed below
         if host not in {"localhost", "localhost.localdomain"}:
-            raise UnsafePgUrlError("هدف پاسارگارد مجاز نیست (metadata/blocked host)")
+            raise UnsafePgUrlError("هدف S-UI مجاز نیست (metadata/blocked host)")
         if not allow_private:
             raise UnsafePgUrlError("آدرس localhost در حالت فقط-عمومی مجاز نیست")
         # Map localhost → loopback for dialing policy
@@ -224,7 +224,7 @@ def assert_safe_pg_base_url(
 
     if ip is not None:
         if _ip_unsafe_for_pg(ip):
-            raise UnsafePgUrlError("آدرس IP پاسارگارد برای اتصال مجاز نیست")
+            raise UnsafePgUrlError("آدرس IP S-UI برای اتصال مجاز نیست")
         if not allow_private and (ip.is_private or ip.is_loopback):
             raise UnsafePgUrlError("در حالت فقط-عمومی، IP خصوصی/لوکال مجاز نیست")
         return url
@@ -235,10 +235,10 @@ def assert_safe_pg_base_url(
     try:
         infos = socket.getaddrinfo(host, parsed.port or 443, type=socket.SOCK_STREAM)
     except socket.gaierror as exc:
-        raise UnsafePgUrlError("نام میزبان پاسارگارد قابل resolve نیست") from exc
+        raise UnsafePgUrlError("نام میزبان S-UI قابل resolve نیست") from exc
 
     if not infos:
-        raise UnsafePgUrlError("نام میزبان پاسارگارد قابل resolve نیست")
+        raise UnsafePgUrlError("نام میزبان S-UI قابل resolve نیست")
 
     saw_public = False
     for info in infos:
@@ -248,13 +248,13 @@ def assert_safe_pg_base_url(
         except ValueError:
             continue
         if _ip_unsafe_for_pg(resolved):
-            raise UnsafePgUrlError("میزبان پاسارگارد به IP ناامن resolve می‌شود")
+            raise UnsafePgUrlError("میزبان S-UI به IP ناامن resolve می‌شود")
         if resolved.is_private or resolved.is_loopback:
             if not allow_private:
-                raise UnsafePgUrlError("میزبان پاسارگارد به IP خصوصی resolve می‌شود")
+                raise UnsafePgUrlError("میزبان S-UI به IP خصوصی resolve می‌شود")
         else:
             saw_public = True
     if not allow_private and not saw_public:
-        raise UnsafePgUrlError("میزبان پاسارگارد باید به IP عمومی resolve شود")
+        raise UnsafePgUrlError("میزبان S-UI باید به IP عمومی resolve شود")
     return url
 

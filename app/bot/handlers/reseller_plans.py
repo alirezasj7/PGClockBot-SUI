@@ -142,7 +142,7 @@ def _plan_text(plan: Plan, *, category_name: str | None = None) -> str:
         f"قیمت: {plan.price:,} تومان\n"
         f"مدت: {plan.duration_days} روز · حجم: {gb}\n"
         f"برچسب دسته: {cat}\n"
-        f"پاسارگارد: {src}\n"
+        f"S-UI: {src}\n"
         f"وضعیت: {'فعال' if plan.is_active else 'خاموش'}"
     )
 
@@ -229,7 +229,7 @@ async def res_plan_webhint(
     if callback.message:
         await callback.message.answer(
             "در وب‌پنل از منوی «پلن‌ها» می‌توانید پلن تست، پلن دلخواه و اتصال دقیق "
-            "به گروه‌ها/تمپلیت‌های مجاز پاسارگارد را مدیریت کنید."
+            "به گروه‌ها/تمپلیت‌های مجاز S-UI را مدیریت کنید."
         )
 
 
@@ -560,7 +560,7 @@ async def _reseller_continue_pg_mode(
     rows: list[list[InlineKeyboardButton]] = []
     if groups:
         rows.append(
-            [InlineKeyboardButton(text="📦 انتخاب گروه پاسارگارد", callback_data="res:plan:mode:groups")]
+            [InlineKeyboardButton(text="📦 انتخاب گروه S-UI", callback_data="res:plan:mode:groups")]
         )
     if templates:
         rows.append(
@@ -568,7 +568,7 @@ async def _reseller_continue_pg_mode(
         )
     rows.append([InlineKeyboardButton(text="❌ انصراف", callback_data="res:plans")])
     await state.set_state(ResellerPlanStates.mode)
-    note = f"\n⚠️ پاسارگارد: {pg_error}" if pg_error else ""
+    note = f"\n⚠️ S-UI: {pg_error}" if pg_error else ""
     target_msg = (
         message_or_cb
         if isinstance(message_or_cb, Message)
@@ -578,15 +578,15 @@ async def _reseller_continue_pg_mode(
         await state.clear()
         if target_msg:
             await target_msg.answer(
-                "گروه یا تمپلیت مجازی در نقش پاسارگارد شما نیست.\n"
-                "از وب‌پنل → پاسارگارد دسترسی‌ها را بررسی کنید یا از ادمین بخواهید نقش را باز کند."
+                "گروه یا تمپلیت مجازی در نقش S-UI شما نیست.\n"
+                "از وب‌پنل → S-UI دسترسی‌ها را بررسی کنید یا از ادمین بخواهید نقش را باز کند."
                 + note,
                 reply_markup=InlineKeyboardMarkup(inline_keyboard=[[kb.back_button(None, PLANS_SCREEN)]]),
             )
         return
     if target_msg:
         await target_msg.answer(
-            "منبع ساخت سرویس در پاسارگارد را انتخاب کنید:" + note,
+            "منبع ساخت سرویس در S-UI را انتخاب کنید:" + note,
             reply_markup=InlineKeyboardMarkup(inline_keyboard=rows),
         )
 

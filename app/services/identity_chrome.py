@@ -130,7 +130,7 @@ def hierarchy_identity(staff: Mapping[str, Any] | None) -> dict[str, Any]:
     if role == "pg_staff":
         return {
             "kind": "pg_staff",
-            "label": "ادمین پاسارگارد",
+            "label": "ادمین S-UI",
             "pg_role_name": None,
             "show_pg_role": False,
             "chips": [],

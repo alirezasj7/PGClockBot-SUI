@@ -1,0 +1,3 @@
+*.sh text eol=lf
+scripts/pgclock text eol=lf
+scripts/pgclockbot-ctl text eol=lf

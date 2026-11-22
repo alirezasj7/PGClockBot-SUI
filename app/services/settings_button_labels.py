@@ -98,7 +98,7 @@ BTN_ADMIN_OPS: list[Field] = [
     ("btn_adm_payments", "رسیدها", "text"),
     ("btn_adm_tickets", "تیکت‌ها", "text"),
     ("btn_adm_plans", "پلن‌ها", "text"),
-    ("btn_adm_pg", "پاسارگارد", "text"),
+    ("btn_adm_pg", "S-UI", "text"),
 ]
 
 BTN_ADMIN_SYS: list[Field] = [
@@ -119,7 +119,7 @@ BTN_STORE_EXTRA: list[Field] = [
 BTN_ADMIN_HUBS: list[Field] = [
     ("btn_adm_hub_ops", "گروه عملیات روزانه", "text"),
     ("btn_adm_hub_people", "گروه افراد", "text"),
-    ("btn_adm_hub_product", "گروه محصول و پاسارگارد", "text"),
+    ("btn_adm_hub_product", "گروه محصول و S-UI", "text"),
     ("btn_adm_hub_marketing", "گروه بازاریابی", "text"),
     ("btn_adm_hub_system", "گروه سیستم", "text"),
     ("btn_adm_edit_mode", "حالت ویرایش منوها", "text"),
@@ -137,8 +137,8 @@ BTN_ADMIN_HUB_ITEMS: list[Field] = [
 
 # Submenu labels that used to be fixed in code (≤8 fields per Telegram screen).
 BTN_ADMIN_PG: list[Field] = [
-    ("btn_pg_stats", "نمای کلی پاسارگارد", "text"),
-    ("btn_pg_users", "کاربران پاسارگارد", "text"),
+    ("btn_pg_stats", "نمای کلی S-UI", "text"),
+    ("btn_pg_users", "کاربران S-UI", "text"),
     ("btn_pg_create", "ساخت کاربر", "text"),
     ("btn_pg_search", "جستجوی یوزر", "text"),
     ("btn_pg_nodes", "نودها", "text"),
@@ -340,7 +340,7 @@ def shop_button_subs(*, include_platform: bool) -> list[tuple]:
         ("btn_roles", "دکمه‌های نقش‌ها", BTN_ROLES),
         ("btn_adm_ops", "دکمه‌های ادمین — عملیات", BTN_ADMIN_OPS),
         ("btn_adm_sys", "دکمه‌های ادمین — سیستم", BTN_ADMIN_SYS),
-        ("btn_adm_pg_sub", "دکمه‌های ادمین — پاسارگارد", BTN_ADMIN_PG),
+        ("btn_adm_pg_sub", "دکمه‌های ادمین — S-UI", BTN_ADMIN_PG),
         ("btn_adm_people_sub", "دکمه‌های ادمین — کاربران و نمایندگان", BTN_ADMIN_PEOPLE_SUB),
         ("btn_adm_settings_sub", "دکمه‌های ادمین — بخش‌های تنظیمات", BTN_ADMIN_SETTINGS_SUB),
         ("btn_adm_settings_more", "دکمه‌های ادمین — قوانین و پشتیبانی در تنظیمات", BTN_ADMIN_SETTINGS_MORE),

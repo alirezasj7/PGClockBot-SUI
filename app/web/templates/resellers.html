@@ -58,7 +58,7 @@
         <span>پیش‌فرض: <code dir="ltr">{{ default_panel_url }}</code></span>
       </small>
     </label>
-    <label class="form-field">آدرس پنل پاسارگارد
+    <label class="form-field">آدرس پنل S-UI
       <input name="reseller_pg_panel_base_url"
              value="{{ custom_pg_panel_url or '' }}"
              placeholder="{{ default_pg_panel_url }}"
@@ -90,13 +90,13 @@
 </div>
 
 <div class="card settings-card">
-  <h2>همگام‌سازی ظرفیت از پاسارگارد</h2>
+  <h2>همگام‌سازی ظرفیت از S-UI</h2>
   <p class="muted update-card-caption">
-    نمایندگانی که با پلن «ظرفیت فعلی» اعطا شده‌اند و ظرفیتشان صفر (نامحدود) ثبت شده، دوباره از سقف حجم و کاربر ادمین‌شان در پاسارگارد خوانده می‌شوند.
-    ظرفیتی که قبلاً درست ثبت شده تغییر نمی‌کند و چیزی در پاسارگارد نوشته نمی‌شود.
+    نمایندگانی که با پلن «ظرفیت فعلی» اعطا شده‌اند و ظرفیتشان صفر (نامحدود) ثبت شده، دوباره از سقف حجم و کاربر ادمین‌شان در S-UI خوانده می‌شوند.
+    ظرفیتی که قبلاً درست ثبت شده تغییر نمی‌کند و چیزی در S-UI نوشته نمی‌شود.
   </p>
   <form method="post" action="/resellers/repair-capacity" class="form-stack"
-        data-confirm="ظرفیت نمایندگانی که صفر ثبت شده دوباره از پاسارگارد خوانده شود؟ چیزی در پاسارگارد تغییر نمی‌کند."
+        data-confirm="ظرفیت نمایندگانی که صفر ثبت شده دوباره از S-UI خوانده شود؟ چیزی در S-UI تغییر نمی‌کند."
         data-confirm-title="همگام‌سازی ظرفیت"
         data-confirm-label="همگام‌سازی">
     <div class="actions">
@@ -145,7 +145,7 @@
   {% if owner_view %}
   {{ table_bulk_bar('/resellers/bulk-action', [
     {'key': 'grant_miniapp', 'label': 'دادن دسترسی مینی‌اپ', 'confirm': 'به {n} نماینده دسترسی «مینی‌اپ فروشگاه برای مشتریان» داده شود؟ نماینده‌ای که دسترسی‌هایش عمداً خالی است تغییر نمی‌کند و مینی‌اپ تا وقتی خود نماینده روشنش نکند باز نمی‌شود.', 'confirm_title': 'دادن دسترسی مینی‌اپ', 'confirm_label': 'دادن دسترسی'},
-    {'key': 'delete_reseller', 'label': 'حذف نمایندگی', 'class': 'btn-danger', 'confirm': '{n} نمایندگی حذف شوند؟ ادمین پاسارگارد متصل هم حذف می‌شود.', 'confirm_title': 'حذف نمایندگی گروهی', 'confirm_label': 'حذف نمایندگی', 'danger': true, 'reason': true, 'reason_label': 'علت حذف نمایندگی'},
+    {'key': 'delete_reseller', 'label': 'حذف نمایندگی', 'class': 'btn-danger', 'confirm': '{n} نمایندگی حذف شوند؟ ادمین S-UI متصل هم حذف می‌شود.', 'confirm_title': 'حذف نمایندگی گروهی', 'confirm_label': 'حذف نمایندگی', 'danger': true, 'reason': true, 'reason_label': 'علت حذف نمایندگی'},
     {'key': 'delete_user', 'label': 'حذف کاربر', 'class': 'btn-danger', 'confirm': '{n} کاربر کامل حذف شوند؟ برگشت‌ناپذیر است.', 'confirm_title': 'حذف کامل گروهی', 'confirm_label': 'حذف کامل', 'danger': true, 'reason': true, 'reason_label': 'علت حذف کامل'},
   ]) }}
   {% endif %}
@@ -239,8 +239,8 @@
                     data-edit-url="/resellers/{{ u.id }}/edit?fragment=1"
                     data-edit-title="ویرایش نماینده #{{ u.id }}">ویرایش</button>
             <form method="post" action="/resellers/{{ u.id }}/delete"
-                  data-confirm="نمایندگی حذف شود؟ ادمین پاسارگارد متصل هم حذف می‌شود و علت برای کاربر ارسال می‌گردد. حساب بات، سفارش‌ها و کیف پول کاربر باقی می‌ماند مگر «حذف کاربر» را بزنید."
-                  data-confirm-title="حذف نمایندگی (+ ادمین پاسارگارد)"
+                  data-confirm="نمایندگی حذف شود؟ ادمین S-UI متصل هم حذف می‌شود و علت برای کاربر ارسال می‌گردد. حساب بات، سفارش‌ها و کیف پول کاربر باقی می‌ماند مگر «حذف کاربر» را بزنید."
+                  data-confirm-title="حذف نمایندگی (+ ادمین S-UI)"
                   data-confirm-danger="1"
                   data-confirm-reason="1"
                   data-confirm-reason-label="علت حذف نمایندگی"
@@ -250,8 +250,8 @@
               <button class="btn btn-sm btn-danger" type="submit">حذف نمایندگی</button>
             </form>
             <form method="post" action="/resellers/{{ u.id }}/delete-user"
-                  data-confirm="{% if (u.wallet_balance or 0) > 0 %}هشدار: موجودی کیف پول {{ u.wallet_balance | money }} تومان از بین می‌رود. {% endif %}کاربر، نمایندگی، ادمین پاسارگارد، تمام سفارش‌ها، سرویس‌ها و پرداخت‌ها کامل حذف شوند؟ برگشت‌ناپذیر است. توجه: اگر دوباره به ربات پیام بدهد، حساب جدید (خالی) برای همان تلگرام ساخته می‌شود."
-                  data-confirm-title="حذف کامل (+ ادمین پاسارگارد)"
+                  data-confirm="{% if (u.wallet_balance or 0) > 0 %}هشدار: موجودی کیف پول {{ u.wallet_balance | money }} تومان از بین می‌رود. {% endif %}کاربر، نمایندگی، ادمین S-UI، تمام سفارش‌ها، سرویس‌ها و پرداخت‌ها کامل حذف شوند؟ برگشت‌ناپذیر است. توجه: اگر دوباره به ربات پیام بدهد، حساب جدید (خالی) برای همان تلگرام ساخته می‌شود."
+                  data-confirm-title="حذف کامل (+ ادمین S-UI)"
                   data-confirm-danger="1"
                   {% if (u.wallet_balance or 0) > 0 %}data-confirm-warn="1"{% endif %}
                   data-confirm-reason="1"
@@ -285,7 +285,7 @@
       {{ modal_title('resellers', 'افزودن نماینده', caption='مدیریت نمایندگی', tone='brand') }}
       <button type="button" class="icon-btn" data-modal-close aria-label="بستن"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
-    <p class="muted">بعد از ثبت، اطلاعات ورود در تلگرام فرستاده می‌شود. حالت پرداخت از پلن نمایندگی و دسترسی‌های پاسارگارد از نقش انتخاب‌شده می‌آید.</p>
+    <p class="muted">بعد از ثبت، اطلاعات ورود در تلگرام فرستاده می‌شود. حالت پرداخت از پلن نمایندگی و دسترسی‌های S-UI از نقش انتخاب‌شده می‌آید.</p>
     <form method="post" action="/resellers" class="form-stack">
       {% if not reseller_plans %}
       <div class="flash warn">هنوز پلن نمایندگی فعالی ندارید — ابتدا از بخش پلن‌ها یک پلن نماینده بسازید.</div>
@@ -299,7 +299,7 @@
           </label>
         </div>
         <div>
-          <label class="form-field">نقش پاسارگارد
+          <label class="form-field">نقش S-UI
             
             <select name="pg_role_id">
               <option value="">— از پلن —</option>
@@ -341,8 +341,8 @@
       </div>
 
       <div class="ui-switch-list">
-        {{ switch('create_pg_admin', 'ساخت ادمین پاسارگارد', checked=true, help='برای مالکیت کاربران لازم است — حتی اگر لینک پنل ارسال نشود') }}
-        {{ switch('share_pg_panel_url', 'ارسال لینک و یوزر/رمز پنل پاسارگارد', checked=false, help='اگر خاموش باشد، نماینده فقط از وب‌پنل ربات مدیریت می‌کند') }}
+        {{ switch('create_pg_admin', 'ساخت ادمین S-UI', checked=true, help='برای مالکیت کاربران لازم است — حتی اگر لینک پنل ارسال نشود') }}
+        {{ switch('share_pg_panel_url', 'ارسال لینک و یوزر/رمز پنل S-UI', checked=false, help='اگر خاموش باشد، نماینده فقط از وب‌پنل ربات مدیریت می‌کند') }}
         {% if owner_view %}{{ oversell_create_switch() }}{% endif %}
       </div>
 
@@ -364,21 +364,21 @@
       <button type="button" class="icon-btn" data-modal-close aria-label="بستن"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <form method="post" action="/resellers/create-child" class="form-stack" autocomplete="off">
-      <p class="muted">نام کاربری و رمز پنل همان نام کاربری و رمز پاسارگارد است. نقش از پاسارگارد شما انتخاب می‌شود.</p>
-      <label class="form-field">نام کاربری پاسارگارد
+      <p class="muted">نام کاربری و رمز پنل همان نام کاربری و رمز S-UI است. نقش از S-UI شما انتخاب می‌شود.</p>
+      <label class="form-field">نام کاربری S-UI
         <input name="pg_username" required dir="ltr" autocomplete="off" />
       </label>
-      <label class="form-field">رمز پاسارگارد
+      <label class="form-field">رمز S-UI
         <input name="pg_password" type="password" required dir="ltr" autocomplete="new-password" />
       </label>
-      <label class="form-field">نقش پاسارگارد
+      <label class="form-field">نقش S-UI
         <select name="pg_role_id" required>
           <option value="">— انتخاب نقش زنده —</option>
           {% for r in l2_pg_roles %}
           <option value="{{ r.id }}">{{ r.name }}</option>
           {% endfor %}
         </select>
-        <small class="muted">فهرست زنده از پاسارگارد شما — نام نقش، سطح سازمان نیست.</small>
+        <small class="muted">فهرست زنده از S-UI شما — نام نقش، سطح سازمان نیست.</small>
       </label>
       <label class="form-field">یادداشت (اختیاری)
         <input name="note" maxlength="200" />
@@ -396,7 +396,7 @@
   <div class="ui-modal-backdrop" data-modal-close></div>
   <div class="ui-modal-panel ui-modal-panel-xl" role="dialog" aria-modal="true" aria-labelledby="reseller-edit-title">
     <div class="ui-modal-head">
-      {{ modal_title('reseller-edit', 'ویرایش نماینده', caption='سقف، دسترسی و اتصال پاسارگارد', tone='brand', heading_id='reseller-edit-title') }}
+      {{ modal_title('reseller-edit', 'ویرایش نماینده', caption='سقف، دسترسی و اتصال S-UI', tone='brand', heading_id='reseller-edit-title') }}
       <button type="button" class="icon-btn" data-modal-close aria-label="بستن"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <div id="reseller-edit-body" class="edit-modal-body">

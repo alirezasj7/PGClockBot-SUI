@@ -853,7 +853,7 @@ async def bot_pg_client_for_resolution(
     if rid:
         return await get_pg_for_reseller(session, int(rid)), False
     raise PasarGuardError(
-        "کلاینت پاسارگارد برای این Principal Bot در دسترس نیست"
+        "کلاینت S-UI برای این Principal Bot در دسترس نیست"
     )
 
 

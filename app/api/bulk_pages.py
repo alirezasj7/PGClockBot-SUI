@@ -77,7 +77,7 @@ def register_bulk_pages(
 
             if not staff_user_actions(staff).get("update"):
                 return redirect_bulk(
-                    return_to, err="نقش پاسارگارد شما اجازه تمدید ندارد"
+                    return_to, err="نقش S-UI شما اجازه تمدید ندارد"
                 )
 
         if action == "block":

@@ -26,9 +26,9 @@
         <th data-sort-type="num">شناسه</th>
         <th data-sort-type="text">وضعیت</th>
         <th data-sort-type="text">نوع</th>
-        <th class="col-hide-sm" data-sort-type="text">کاربر پاسارگارد</th>
+        <th class="col-hide-sm" data-sort-type="text">کاربر S-UI</th>
         <th class="col-hide-sm" data-sort-type="text">والد</th>
-        <th class="col-hide-sm" data-sort-type="text">نقش پاسارگارد</th>
+        <th class="col-hide-sm" data-sort-type="text">نقش S-UI</th>
         <th class="col-hide-sm" data-sort-type="text">هویت وب</th>
         <th class="col-hide-sm" data-sort-type="text">ربات</th>
         <th class="col-hide-sm" data-sort-type="text">ایجاد</th>
@@ -57,7 +57,7 @@
         <td class="col-hide-sm">—</td>
         <td class="col-hide-sm" data-sort-value="{{ row.pg_role_name or '' }}">
           {% if row.pg_role_name %}
-          <span class="identity-pg-role">نقش پاسارگارد: {{ row.pg_role_name }}</span>
+          <span class="identity-pg-role">نقش S-UI: {{ row.pg_role_name }}</span>
           {% else %}
           —
           {% endif %}
@@ -89,7 +89,7 @@
         <td class="mono col-hide-sm" dir="ltr">{{ child.parent_username or row.pg_username or '—' }}</td>
         <td class="col-hide-sm" data-sort-value="{{ child.pg_role_name or '' }}">
           {% if child.pg_role_name %}
-          <span class="identity-pg-role">نقش پاسارگارد: {{ child.pg_role_name }}</span>
+          <span class="identity-pg-role">نقش S-UI: {{ child.pg_role_name }}</span>
           {% else %}
           —
           {% endif %}
@@ -126,7 +126,7 @@
         <td class="mono col-hide-sm" dir="ltr">{{ child.parent_username or '—' }}</td>
         <td class="col-hide-sm" data-sort-value="{{ child.pg_role_name or '' }}">
           {% if child.pg_role_name %}
-          <span class="identity-pg-role">نقش پاسارگارد: {{ child.pg_role_name }}</span>
+          <span class="identity-pg-role">نقش S-UI: {{ child.pg_role_name }}</span>
           {% else %}
           —
           {% endif %}
@@ -158,21 +158,21 @@
       <button type="button" class="icon-btn" data-modal-close aria-label="بستن"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <form method="post" action="/principals/create" class="form-stack" autocomplete="off">
-      <p class="muted">نام کاربری و رمز پنل همان نام کاربری و رمز پاسارگارد است. نقش پاسارگارد فقط پروفایل قابلیت است.</p>
-      <label class="form-field">نام کاربری پاسارگارد
+      <p class="muted">نام کاربری و رمز پنل همان نام کاربری و رمز S-UI است. نقش S-UI فقط پروفایل قابلیت است.</p>
+      <label class="form-field">نام کاربری S-UI
         <input name="pg_username" required dir="ltr" autocomplete="off" />
       </label>
-      <label class="form-field">رمز پاسارگارد
+      <label class="form-field">رمز S-UI
         <input name="pg_password" type="password" required dir="ltr" autocomplete="new-password" />
       </label>
-      <label class="form-field">نقش پاسارگارد
+      <label class="form-field">نقش S-UI
         <select name="pg_role_id" required>
           <option value="">— انتخاب نقش زنده —</option>
           {% for r in pg_roles %}
           <option value="{{ r.id }}">{{ r.name }}</option>
           {% endfor %}
         </select>
-        <small class="muted">فهرست زنده از پاسارگارد — نام نقش، سطح سازمان نیست.</small>
+        <small class="muted">فهرست زنده از S-UI — نام نقش، سطح سازمان نیست.</small>
       </label>
       <label class="form-field">یادداشت (اختیاری)
         <input name="note" maxlength="200" />
@@ -195,21 +195,21 @@
       <button type="button" class="icon-btn" data-modal-close aria-label="بستن"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <form method="post" action="/principals/create-l2" class="form-stack" autocomplete="off">
-      <p class="muted">نام کاربری و رمز پنل همان نام کاربری و رمز پاسارگارد است. نقش از پاسارگارد شما انتخاب می‌شود.</p>
-      <label class="form-field">نام کاربری پاسارگارد
+      <p class="muted">نام کاربری و رمز پنل همان نام کاربری و رمز S-UI است. نقش از S-UI شما انتخاب می‌شود.</p>
+      <label class="form-field">نام کاربری S-UI
         <input name="pg_username" required dir="ltr" autocomplete="off" />
       </label>
-      <label class="form-field">رمز پاسارگارد
+      <label class="form-field">رمز S-UI
         <input name="pg_password" type="password" required dir="ltr" autocomplete="new-password" />
       </label>
-      <label class="form-field">نقش پاسارگارد
+      <label class="form-field">نقش S-UI
         <select name="pg_role_id" required>
           <option value="">— انتخاب نقش زنده —</option>
           {% for r in l2_pg_roles %}
           <option value="{{ r.id }}">{{ r.name }}</option>
           {% endfor %}
         </select>
-        <small class="muted">فهرست زنده از پاسارگارد شما — نام نقش، سطح سازمان نیست.</small>
+        <small class="muted">فهرست زنده از S-UI شما — نام نقش، سطح سازمان نیست.</small>
       </label>
       <label class="form-field">یادداشت (اختیاری)
         <input name="note" maxlength="200" />
@@ -243,16 +243,16 @@
         {% endif %}
       </p>
       <p>شناسه: <span class="mono" dir="ltr">{{ detail.principal_id }}</span></p>
-      <p>کاربر پاسارگارد: <span class="mono" dir="ltr">{{ detail.pg_username or '—' }}</span></p>
+      <p>کاربر S-UI: <span class="mono" dir="ltr">{{ detail.pg_username or '—' }}</span></p>
       {% if detail.depth == 2 %}
       <p>والد: <span class="mono" dir="ltr">{{ detail.parent_username or '—' }}</span></p>
       <p>ربات: {{ detail.bot_binding_label }}</p>
       {% endif %}
       <p>
         {% if detail.pg_role_name %}
-        <span class="identity-pg-role">نقش پاسارگارد: {{ detail.pg_role_name }}</span>
+        <span class="identity-pg-role">نقش S-UI: {{ detail.pg_role_name }}</span>
         {% else %}
-        نقش پاسارگارد: —
+        نقش S-UI: —
         {% endif %}
       </p>
       <p>هویت وب: {{ detail.web_identity_label }}</p>
@@ -309,11 +309,11 @@
       <button type="button" class="icon-btn" data-modal-close aria-label="بستن"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <form method="post" action="/principals/{{ detail.principal_id }}/web-identity" class="form-stack" autocomplete="off">
-      <p class="muted">نام کاربری پنل همان نام کاربری پاسارگارد است و تغییر نمی‌کند.</p>
+      <p class="muted">نام کاربری پنل همان نام کاربری S-UI است و تغییر نمی‌کند.</p>
       <label class="form-field">نام کاربری
         <input name="username" required dir="ltr" autocomplete="off" value="{{ detail.pg_username or '' }}" readonly />
       </label>
-      <label class="form-field">رمز عبور (همان رمز پاسارگارد)
+      <label class="form-field">رمز عبور (همان رمز S-UI)
         <input name="password" type="password" required dir="ltr" autocomplete="new-password" />
       </label>
       <div class="actions">

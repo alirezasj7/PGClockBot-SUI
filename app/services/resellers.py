@@ -280,7 +280,7 @@ async def apply_reseller_panel_password(
         return
     enc = encrypt_secret(pwd)
     if not enc:
-        raise ValueError("رمز‌گذاری رمز پاسارگارد ناموفق بود — دوباره تلاش کنید")
+        raise ValueError("رمز‌گذاری رمز S-UI ناموفق بود — دوباره تلاش کنید")
     from app.services.org_principals import get_principal_by_reseller_profile
 
     linked = await get_principal_by_reseller_profile(session, int(profile.id))
@@ -299,7 +299,7 @@ async def apply_reseller_panel_password(
             client = await get_pg_for_principal(session, principal_id=int(linked.id))
             await client.modify_admin(profile.pg_admin_username, {"password": pwd})
         except Exception as e:
-            raise ValueError(f"به‌روزرسانی رمز پاسارگارد ناموفق: {e}") from e
+            raise ValueError(f"به‌روزرسانی رمز S-UI ناموفق: {e}") from e
         linked.pg_password_enc = enc
         profile.pg_admin_password_enc = None
         try:
@@ -316,7 +316,7 @@ async def apply_reseller_panel_password(
             client = await get_pg_for_reseller(session, int(profile.user_id))
             await client.modify_admin(profile.pg_admin_username, {"password": pwd})
         except Exception as e:
-            raise ValueError(f"به‌روزرسانی رمز پاسارگارد ناموفق: {e}") from e
+            raise ValueError(f"به‌روزرسانی رمز S-UI ناموفق: {e}") from e
         profile.pg_admin_password_enc = enc
         try:
             invalidate_pg_reseller_cache(int(profile.user_id))
@@ -328,7 +328,7 @@ async def apply_reseller_panel_password(
     try:
         await get_pg().modify_admin(profile.pg_admin_username, {"password": pwd})
     except Exception as e:
-        raise ValueError(f"به‌روزرسانی رمز پاسارگارد ناموفق: {e}") from e
+        raise ValueError(f"به‌روزرسانی رمز S-UI ناموفق: {e}") from e
     # Drop cached PG clients so next shop op uses the new password
     try:
         reset_pg()
@@ -376,7 +376,7 @@ async def apply_reseller_pg_api_key(
         return
     if len(raw) < 16:
         raise ValueError(
-            "کلید API پاسارگارد کوتاه است — مقدار کامل را از پنل پاسارگارد کپی کنید"
+            "کلید API S-UI کوتاه است — مقدار کامل را از پنل S-UI کپی کنید"
         )
     enc = encrypt_secret(raw)
     if not enc:
@@ -549,11 +549,11 @@ def format_reseller_plan_apply_detail(plan: ResellerPlan, *, currency: str) -> s
             )
     groups = (getattr(plan, "pg_group_ids", None) or "").strip()
     lines.append(
-        f"گروه‌های پاسارگارد: <code>{html.escape(groups) if groups else '—'}</code>"
+        f"گروه‌های S-UI: <code>{html.escape(groups) if groups else '—'}</code>"
     )
     role_id = getattr(plan, "pg_role_id", None)
     lines.append(
-        f"نقش پاسارگارد: <code>{html.escape(str(role_id)) if role_id else '—'}</code>"
+        f"نقش S-UI: <code>{html.escape(str(role_id)) if role_id else '—'}</code>"
     )
     return "\n".join(lines)
 
@@ -568,7 +568,7 @@ async def list_reseller_plans(session: AsyncSession) -> list[ResellerPlan]:
 CURRENT_CAPACITY_PLAN_NAME = "ظرفیت فعلی"
 CURRENT_CAPACITY_PLAN_KIND = "current_capacity"
 CURRENT_CAPACITY_PLAN_DESCRIPTION = (
-    "سقف حجم و کاربر را از همین ادمین پاسارگارد می‌خواند و عوض نمی‌کند. "
+    "سقف حجم و کاربر را از همین ادمین S-UI می‌خواند و عوض نمی‌کند. "
     "فقط برای اعطای نماینده به ادمین از قبل موجود — برای ساخت نمایندهٔ جدید پلن دیگری بزنید."
 )
 
@@ -1131,7 +1131,7 @@ async def provision_reseller(
         pg_password = shared_password
         pg_password_enc = encrypt_secret(pg_password)
         if not pg_password_enc:
-            raise ValueError("رمز‌گذاری رمز پاسارگارد ناموفق بود — دوباره تلاش کنید")
+            raise ValueError("رمز‌گذاری رمز S-UI ناموفق بود — دوباره تلاش کنید")
         payload: dict = {
             "username": pg_username,
             "password": pg_password,
@@ -1160,9 +1160,9 @@ async def provision_reseller(
                 try:
                     await get_pg().create_admin(payload)
                 except Exception as e2:
-                    raise ValueError(f"ساخت ادمین پاسارگارد ناموفق: {e2}") from e2
+                    raise ValueError(f"ساخت ادمین S-UI ناموفق: {e2}") from e2
             else:
-                raise ValueError(f"ساخت ادمین پاسارگارد ناموفق: {e}") from e
+                raise ValueError(f"ساخت ادمین S-UI ناموفق: {e}") from e
 
     web_username = None
     web_password = None
@@ -1250,7 +1250,7 @@ def format_credentials_message(creds: dict) -> str:
     if unified and panel_user and panel_pass:
         lines += [
             "🔐 <b>ورود یکپارچه</b>",
-            "<i>همان یوزر و رمز برای وب‌پنل و پاسارگارد</i>",
+            "<i>همان یوزر و رمز برای وب‌پنل و S-UI</i>",
             "",
         ]
         if panel:
@@ -1258,7 +1258,7 @@ def format_credentials_message(creds: dict) -> str:
         else:
             lines += ["🌐 <b>آدرس وب‌پنل</b>\nهنوز تنظیم نشده — از ادمین بپرسید.", ""]
         if share_pg and pg_panel:
-            lines += [f"🛡 <b>آدرس پاسارگارد</b>\n{copyable(pg_panel)}", ""]
+            lines += [f"🛡 <b>آدرس S-UI</b>\n{copyable(pg_panel)}", ""]
         lines += [
             f"👤 <b>نام کاربری</b>\n{copyable(panel_user)}",
             "",
@@ -1268,7 +1268,7 @@ def format_credentials_message(creds: dict) -> str:
         ]
     else:
         if share_pg or creds.get("pg_username"):
-            lines += ["🛡 <b>پنل پاسارگارد</b>", ""]
+            lines += ["🛡 <b>پنل S-UI</b>", ""]
             if pg_panel:
                 lines += [f"آدرس:\n{copyable(pg_panel)}", ""]
             if creds.get("pg_username") and creds.get("pg_password"):
@@ -1279,7 +1279,7 @@ def format_credentials_message(creds: dict) -> str:
                     "",
                 ]
             elif not pg_panel:
-                lines += ["ادمین پاسارگارد برای این پلن ساخته نشد.", ""]
+                lines += ["ادمین S-UI برای این پلن ساخته نشد.", ""]
 
         lines += ["🌐 <b>وب‌پنل ربات</b>", ""]
         if panel:
@@ -1333,7 +1333,7 @@ async def format_reseller_my_service_card(session: AsyncSession, profile) -> str
     sub = await get_subscription(session, uname) if uname else None
 
     block: list[str] = [
-        kv_line("🛡", "ادمین پاسارگارد", copyable(uname) if uname else "—"),
+        kv_line("🛡", "ادمین S-UI", copyable(uname) if uname else "—"),
     ]
     if plan is not None:
         block.append(kv_line("💎", "پلن", str(plan.name or "—")))
@@ -1375,7 +1375,7 @@ async def format_reseller_my_service_card(session: AsyncSession, profile) -> str
         if role_name:
             block.append(kv_line("🎭", "نقش", str(role_name)))
     else:
-        err = (overview.get("error") or "").strip() or "خواندن ظرفیت از پاسارگارد ممکن نشد"
+        err = (overview.get("error") or "").strip() or "خواندن ظرفیت از S-UI ممکن نشد"
         block.append(kv_line("⚠️", "ظرفیت زنده", err))
 
     if sub is not None:
@@ -1420,12 +1420,12 @@ async def format_reseller_access_card(session: AsyncSession, profile) -> str:
     ]
     if unified:
         block.append(
-            kv_line("👤", "یوزر (وب‌پنل + پاسارگارد)", copyable(web_u) if web_u else "—")
+            kv_line("👤", "یوزر (وب‌پنل + S-UI)", copyable(web_u) if web_u else "—")
         )
     else:
         block.append(kv_line("👤", "نام کاربری وب", copyable(web_u) if web_u else "—"))
         if pg_u:
-            block.append(kv_line("🛡", "کاربر پاسارگارد", copyable(pg_u)))
+            block.append(kv_line("🛡", "کاربر S-UI", copyable(pg_u)))
     if profile.bot_username:
         block.append(kv_line("🤖", "ربات اختصاصی", copyable(f"@{profile.bot_username}")))
     else:
@@ -1436,7 +1436,7 @@ async def format_reseller_access_card(session: AsyncSession, profile) -> str:
     lines.append("")
     if unified:
         lines.append(
-            "یک یوزر/رمز برای وب‌پنل ربات و پنل پاسارگارد است. "
+            "یک یوزر/رمز برای وب‌پنل ربات و پنل S-UI است. "
             "رمز فقط یک‌بار هنگام فعال‌سازی ارسال شده؛ بازنشانی از ادمین یا صفحه امنیت وب‌پنل."
         )
     else:
@@ -1482,7 +1482,7 @@ async def complete_reseller_setup(
             select(PgStaffAccess).where(PgStaffAccess.web_username == uname)
         )
         if clash_staff.scalar_one_or_none():
-            raise ValueError("این نام کاربری قبلاً برای دسترسی وب ادمین پاسارگارد گرفته شده")
+            raise ValueError("این نام کاربری قبلاً برای دسترسی وب ادمین S-UI گرفته شده")
         if not password_hash:
             raise ValueError("رمز عبور الزامی است")
         profile.web_username = uname
@@ -1726,7 +1726,7 @@ async def get_or_create_pg_linked_bot_user(
                 user = None
                 break
         else:
-            raise RuntimeError("امکان تخصیص شناسه پایدار برای ادمین پاسارگارد نیست")
+            raise RuntimeError("امکان تخصیص شناسه پایدار برای ادمین S-UI نیست")
         if user:
             return user
 
@@ -1784,7 +1784,7 @@ async def provision_existing_pg_admin(
 
     pg_u = (pg_username or "").strip().lower()
     if not pg_u:
-        return None, None, "نام ادمین پاسارگارد الزامی است"
+        return None, None, "نام ادمین S-UI الزامی است"
 
     plan = await session.get(ResellerPlan, int(plan_id))
     if not plan or not plan.is_active:
@@ -1865,7 +1865,7 @@ async def provision_existing_pg_admin(
         return (
             None,
             None,
-            "برای ورود یکپارچه، نام کاربری وب باید دقیقاً همان نام ادمین پاسارگارد باشد",
+            "برای ورود یکپارچه، نام کاربری وب باید دقیقاً همان نام ادمین S-UI باشد",
         )
 
     # Password: empty on edit keeps previous hash only when enc already present.
@@ -1888,7 +1888,7 @@ async def provision_existing_pg_admin(
             return (
                 None,
                 None,
-                "رمز عبور الزامی است — اعتبارنامه پاسارگارد ذخیره نشده",
+                "رمز عبور الزامی است — اعتبارنامه S-UI ذخیره نشده",
             )
 
     # Username uniqueness (exclude current profile)
@@ -1907,7 +1907,7 @@ async def provision_existing_pg_admin(
         )
     ).scalar_one_or_none()
     if taken_staff:
-        return None, None, "این نام کاربری قبلاً برای دسترسی وب ادمین پاسارگارد گرفته شده"
+        return None, None, "این نام کاربری قبلاً برای دسترسی وب ادمین S-UI گرفته شده"
 
     role_id = await resolve_pg_role_id_for_admin(pg_u)
     perms = normalize_feature_perms(
@@ -1952,13 +1952,13 @@ async def provision_existing_pg_admin(
 
         enc = encrypt_secret(pwd)
         if not enc:
-            return None, None, "رمز‌گذاری رمز پاسارگارد ناموفق بود — دوباره تلاش کنید"
+            return None, None, "رمز‌گذاری رمز S-UI ناموفق بود — دوباره تلاش کنید"
         profile.pg_admin_password_enc = enc
         try:
             await get_pg().modify_admin(pg_u, {"password": pwd})
             reset_pg()
         except Exception as e:
-            return None, None, f"به‌روزرسانی رمز پاسارگارد ناموفق: {e}"
+            return None, None, f"به‌روزرسانی رمز S-UI ناموفق: {e}"
     await session.commit()
     await session.refresh(profile)
 
@@ -2004,7 +2004,7 @@ async def convert_staff_to_reseller(
 
     pg_u = (pg_username or "").strip().lower()
     if not pg_u:
-        return None, None, "نام ادمین پاسارگارد الزامی است"
+        return None, None, "نام ادمین S-UI الزامی است"
 
     staff = await access_by_pg_username(session, pg_u)
     if staff is None:
@@ -2022,7 +2022,7 @@ async def convert_staff_to_reseller(
             None,
             None,
             "رمز عبور الزامی است. "
-            "علت: رمز پاسارگارد برای ادمین فرعی ذخیره نشده "
+            "علت: رمز S-UI برای ادمین فرعی ذخیره نشده "
             "(کلید API به‌تنهایی برای ورود وب کافی نیست). "
             "راه حل: رمز مشترک را در فرم وارد کنید.",
         )

@@ -55,14 +55,14 @@ _PG_BUSINESS_MSG_MAP: list[tuple[re.Pattern[str], str]] = [
             r"|((field\s*)?required|missing).{0,40}\bgroup_ids?\b",
             re.I,
         ),
-        "گروه پاسارگارد برای این پلن تنظیم نشده یا خالی است — در ویرایش پلن گروه را انتخاب کنید.",
+        "گروه S-UI برای این پلن تنظیم نشده یا خالی است — در ویرایش پلن گروه را انتخاب کنید.",
     ),
     (
         re.compile(
             r"\b(expire|data_limit|status|proxy_settings)\b.{0,60}(invalid|not\s*valid|required)",
             re.I,
         ),
-        "یکی از فیلدهای محدودیت سرویس (انقضا/حجم/وضعیت) برای پاسارگارد نامعتبر است.",
+        "یکی از فیلدهای محدودیت سرویس (انقضا/حجم/وضعیت) برای S-UI نامعتبر است.",
     ),
 ]
 
@@ -172,7 +172,7 @@ def validate_pg_username(
 
     if errors:
         return u, _format_issues(
-            "نام کاربری با محدودیت‌های پاسارگارد هماهنگ نیست:",
+            "نام کاربری با محدودیت‌های S-UI هماهنگ نیست:",
             errors,
         )
     return u, None
@@ -230,7 +230,7 @@ def validate_password_strength(
 
     if errors:
         return False, _format_issues(
-            "رمز عبور با محدودیت‌های پاسارگارد هماهنگ نیست:",
+            "رمز عبور با محدودیت‌های S-UI هماهنگ نیست:",
             errors,
         )
     return True, ""
@@ -256,7 +256,7 @@ def password_policy_hint_fa() -> str:
     """Short Persian hint for forms (matches PasarGuard rules)."""
     return (
         "حداقل ۱۲ کاراکتر، شامل حداقل دو رقم، دو حرف بزرگ، دو حرف کوچک "
-        "و یک کاراکتر خاص (طبق قوانین پاسارگارد)"
+        "و یک کاراکتر خاص (طبق قوانین S-UI)"
     )
 
 
@@ -264,7 +264,7 @@ def username_policy_hint_fa() -> str:
     """Short Persian hint for username fields (matches PasarGuard rules)."""
     return (
         "۳ تا ۱۲۸ کاراکتر؛ فقط حروف انگلیسی، عدد و - _ @ . "
-        "— بدون فاصله و بدون دو نماد پشت‌سرهم (قوانین پاسارگارد)"
+        "— بدون فاصله و بدون دو نماد پشت‌سرهم (قوانین S-UI)"
     )
 
 
@@ -284,14 +284,14 @@ def humanize_pg_validation_error(text: str) -> str:
     # Drop noisy pydantic prefixes when present
     out = re.sub(r"(?i)\bvalue error,?\s*", "", out)
     out = re.sub(r"\s+", " ", out).strip(" ;.")
-    return f"پاسارگارد درخواست را رد کرد. علت: {out}"
+    return f"S-UI درخواست را رد کرد. علت: {out}"
 
 
 # Transport / generic HTTP noise → short Persian (bot + panel).
 _PG_TRANSPORT_MSG_MAP: list[tuple[re.Pattern[str], str]] = [
     (
         re.compile(r"timed?\s*out|timeout|deadline exceeded", re.I),
-        "اتصال به پاسارگارد طول کشید. کمی بعد دوباره تلاش کنید.",
+        "اتصال به S-UI طول کشید. کمی بعد دوباره تلاش کنید.",
     ),
     (
         re.compile(
@@ -300,15 +300,15 @@ _PG_TRANSPORT_MSG_MAP: list[tuple[re.Pattern[str], str]] = [
             r"failed\s*to\s*establish|connect\s*error",
             re.I,
         ),
-        "ارتباط با پاسارگارد برقرار نشد. آدرس/شبکه را بررسی کنید.",
+        "ارتباط با S-UI برقرار نشد. آدرس/شبکه را بررسی کنید.",
     ),
     (
         re.compile(r"\b401\b|unauthorized", re.I),
-        "ورود به پاسارگارد ناموفق بود. نام کاربری یا رمز را بررسی کنید.",
+        "ورود به S-UI ناموفق بود. نام کاربری یا رمز را بررسی کنید.",
     ),
     (
         re.compile(r"\b404\b|not\s*found", re.I),
-        "مورد درخواستی در پاسارگارد پیدا نشد.",
+        "مورد درخواستی در S-UI پیدا نشد.",
     ),
     (
         re.compile(r"\b429\b|too\s*many\s*requests|rate\s*limit", re.I),
@@ -316,7 +316,7 @@ _PG_TRANSPORT_MSG_MAP: list[tuple[re.Pattern[str], str]] = [
     ),
     (
         re.compile(r"\b50[0-4]\b|bad\s*gateway|service\s*unavailable|internal\s*server", re.I),
-        "پاسارگارد موقتاً در دسترس نیست. کمی بعد دوباره تلاش کنید.",
+        "S-UI موقتاً در دسترس نیست. کمی بعد دوباره تلاش کنید.",
     ),
     (
         re.compile(r"failed\s*\(\s*409\s*\)", re.I),
@@ -328,11 +328,11 @@ _PG_TRANSPORT_MSG_MAP: list[tuple[re.Pattern[str], str]] = [
     ),
     (
         re.compile(r"failed\s*\(\s*405\s*\)|method\s*not\s*allowed", re.I),
-        "این عملیات در پاسارگارد پشتیبانی نشد (متد نامعتبر). آدرس PG_BASE_URL و نسخه پنل را بررسی کنید.",
+        "این عملیات در S-UI پشتیبانی نشد (متد نامعتبر). آدرس PG_BASE_URL و نسخه پنل را بررسی کنید.",
     ),
     (
         re.compile(r"failed\s*\(\s*422\s*\)", re.I),
-        "پاسارگارد دادهٔ ارسالی را نامعتبر دانست. گروه پلن، نام کاربری و محدودیت حجم/زمان را بررسی کنید.",
+        "S-UI دادهٔ ارسالی را نامعتبر دانست. گروه پلن، نام کاربری و محدودیت حجم/زمان را بررسی کنید.",
     ),
 ]
 
@@ -350,22 +350,22 @@ def friendly_pg_error(text: str, *, status_code: int | None = None) -> str:
     if status_code == 403:
         return "اجازه این عمل را ندارید."
     if status_code == 401:
-        return "ورود به پاسارگارد ناموفق بود. نام کاربری یا رمز را بررسی کنید."
+        return "ورود به S-UI ناموفق بود. نام کاربری یا رمز را بررسی کنید."
     if status_code == 404:
-        return "مورد درخواستی در پاسارگارد پیدا نشد."
+        return "مورد درخواستی در S-UI پیدا نشد."
     if status_code in {500, 502, 503, 504}:
-        return "پاسارگارد موقتاً در دسترس نیست. کمی بعد دوباره تلاش کنید."
+        return "S-UI موقتاً در دسترس نیست. کمی بعد دوباره تلاش کنید."
     if status_code == 429:
         return "درخواست‌ها زیاد شده است. کمی صبر کنید و دوباره تلاش کنید."
     if status_code == 405:
         return (
-            "این عملیات در پاسارگارد پشتیبانی نشد (متد نامعتبر). "
+            "این عملیات در S-UI پشتیبانی نشد (متد نامعتبر). "
             "آدرس PG_BASE_URL و نسخه پنل را بررسی کنید."
         )
     if not raw:
         if status_code == 422:
             return (
-                "پاسارگارد دادهٔ ارسالی را نامعتبر دانست. "
+                "S-UI دادهٔ ارسالی را نامعتبر دانست. "
                 "گروه پلن، نام کاربری و محدودیت حجم/زمان را بررسی کنید."
             )
         return raw
@@ -384,7 +384,7 @@ def friendly_pg_error(text: str, *, status_code: int | None = None) -> str:
     if humanized != raw:
         return humanized
     if status_code == 422:
-        return f"پاسارگارد داده را نامعتبر دانست: {raw[:300]}"
+        return f"S-UI داده را نامعتبر دانست: {raw[:300]}"
     return raw
 
 

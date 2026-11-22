@@ -40,7 +40,7 @@ STUCK_STATUSES = (OrderStatus.PAID.value, OrderStatus.DELIVERING.value)
 ORDER_NOT_FOUND = "سفارش پیدا نشد"
 NOT_STUCK = "این سفارش دیگر گیرکرده نیست یا همین حالا در حال تحویل است؛ چند دقیقه بعد دوباره امتحان کنید"
 MUTATION_MAY_BE_APPLIED = (
-    "آخرین تلاشِ اعمال این تمدید یا بسته نتیجهٔ نامعلومی داشت و شاید در پاسارگارد اعمال شده باشد؛ "
+    "آخرین تلاشِ اعمال این تمدید یا بسته نتیجهٔ نامعلومی داشت و شاید در S-UI اعمال شده باشد؛ "
     "بازگشت وجه انجام نشد. سرویس را در پنل بررسی کنید و بعد «تحویل دستی انجام شد» یا «بستن بدون بازگشت وجه» را بزنید"
 )
 APPLICATION_APPROVED = (
@@ -235,7 +235,7 @@ def _reason_text(order: Order, app: ResellerApplication | None) -> str:
         return APPLICATION_REASONS.get(app.status if app else "", "درخواست نمایندگیِ این سفارش پیدا نشد")
     if is_mutation_order_note(note):
         if _mutation_may_be_applied(order):
-            return "آخرین تلاش برای اعمال در پاسارگارد نتیجهٔ نامعلومی داشت"
+            return "آخرین تلاش برای اعمال در S-UI نتیجهٔ نامعلومی داشت"
         return "سرویسی که باید تمدید یا افزوده شود دیگر وجود ندارد (حذف یا لغو شده)"
     if order.status == OrderStatus.DELIVERING.value:
         return "ساخت سرویس شروع شد ولی تمام نشد"

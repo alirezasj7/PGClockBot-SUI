@@ -269,7 +269,7 @@ async def load_pg_plan_options(
             await pg.ensure_token()
         except Exception as e:
             log.warning("load_pg_plan_options token failed: %s", e)
-            return [], [], "اتصال به پاسارگارد برقرار نشد"
+            return [], [], "اتصال به S-UI برقرار نشد"
         try:
             templates = await pg.get_user_templates_simple()
             full = await pg.get_user_templates()
@@ -288,7 +288,7 @@ async def load_pg_plan_options(
     except Exception as e:
         # Never surface raw PG/HTTP exception text to the panel (info leak).
         log.warning("load_pg_plan_options failed: %s", e)
-        pg_error = "اتصال به پاسارگارد برقرار نشد"
+        pg_error = "اتصال به S-UI برقرار نشد"
     templates = [t for t in templates if isinstance(t, dict)]
     groups = [g for g in groups if isinstance(g, dict)]
     trust = trust_pg_list_scope(staff) if staff else True
@@ -498,7 +498,7 @@ def format_reseller_plan_delete_blocked(
     if n_prof:
         parts.append(f"{n_prof} نماینده")
     if n_sub:
-        parts.append(f"{n_sub} اشتراک پاسارگارد")
+        parts.append(f"{n_sub} اشتراک S-UI")
     if n_app:
         parts.append(f"{n_app} درخواست نمایندگی")
     label = f"پلن نمایندگی «{plan_name}»" if plan_name else "این پلن نمایندگی"

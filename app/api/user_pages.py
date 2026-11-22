@@ -453,7 +453,7 @@ def register_user_pages(app, *, render, require_admin, get_db, require_perm=None
         form = await request.form()
         if not staff_user_actions(staff).get("update"):
             return _redirect_list_form(
-                form, err="نقش پاسارگارد شما اجازه تمدید ندارد", uid=user_id
+                form, err="نقش S-UI شما اجازه تمدید ندارد", uid=user_id
             )
 
         loaded = await _require_scoped_user(session, staff, user_id)
@@ -668,9 +668,9 @@ def register_user_pages(app, *, render, require_admin, get_db, require_perm=None
         except Exception as e:
             return _redirect_user(user_id, err=_op_err(e, prefix="حذف سرویس ناموفق"))
         if is_external_service(svc) and not delete_pg:
-            return _redirect_user(user_id, ok=f"سرویس #{service_id} از لیست مشتری جدا شد؛ حساب پاسارگارد حفظ شد")
-        note = " (پاسارگارد حذف شد)" if info.get("pg_deleted") else (
-            " (پاسارگارد غیرفعال شد)" if info.get("pg_disabled") else ""
+            return _redirect_user(user_id, ok=f"سرویس #{service_id} از لیست مشتری جدا شد؛ حساب S-UI حفظ شد")
+        note = " (S-UI حذف شد)" if info.get("pg_deleted") else (
+            " (S-UI غیرفعال شد)" if info.get("pg_disabled") else ""
         )
         return _redirect_user(user_id, ok=f"سرویس #{service_id} حذف شد{note}")
 

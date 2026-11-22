@@ -543,7 +543,7 @@ def register_reseller_pages(app, *, render, require_admin, get_db, require_staff
         except Exception:
             logger.debug("reseller_create: ignored failure", exc_info=True)
         return RedirectResponse(
-            f"/resellers?ok={_q('نماینده فعال شد — اطلاعات ورود (پاسارگارد + وب‌پنل) ارسال شد')}",
+            f"/resellers?ok={_q('نماینده فعال شد — اطلاعات ورود (S-UI + وب‌پنل) ارسال شد')}",
             status_code=303,
         )
 
@@ -893,7 +893,7 @@ def register_reseller_pages(app, *, render, require_admin, get_db, require_staff
             except PasarGuardError as e:
                 return _redirect_reseller_edit(user_id, err=e.user_message(fallback=str(e)))
             except Exception as e:
-                return _redirect_reseller_edit(user_id, err=f'همگام‌سازی نقش پاسارگارد ناموفق: {e}')
+                return _redirect_reseller_edit(user_id, err=f'همگام‌سازی نقش S-UI ناموفق: {e}')
         from app.services.reseller_access import normalize_telegram_ids_csv
 
         profile.bot_admin_ids = normalize_telegram_ids_csv(
@@ -1040,7 +1040,7 @@ def register_reseller_pages(app, *, render, require_admin, get_db, require_staff
         from app.services.reseller_capacity_view import sync_reseller_capacity
 
         if not is_explicit_owner_staff(staff):
-            return _redirect_reseller_edit(user_id, err="فقط مالک اصلی می‌تواند ظرفیت را از پاسارگارد همگام کند")
+            return _redirect_reseller_edit(user_id, err="فقط مالک اصلی می‌تواند ظرفیت را از S-UI همگام کند")
         profile = (
             await session.execute(select(ResellerProfile).where(ResellerProfile.user_id == user_id))
         ).scalar_one_or_none()
@@ -1052,7 +1052,7 @@ def register_reseller_pages(app, *, render, require_admin, get_db, require_staff
             return _redirect_reseller_edit(user_id, err=str(e))
         gb_text = f"{gb} گیگ" if gb else "حجم نامحدود"
         users_text = f"{users} کاربر" if users else "کاربر نامحدود"
-        return _redirect_reseller_edit(user_id, ok=f"ظرفیت از پاسارگارد خوانده شد: {gb_text} · {users_text}")
+        return _redirect_reseller_edit(user_id, ok=f"ظرفیت از S-UI خوانده شد: {gb_text} · {users_text}")
 
     @app.post("/resellers/{user_id}/delete")
     async def reseller_delete(
@@ -1101,10 +1101,10 @@ def register_reseller_pages(app, *, render, require_admin, get_db, require_staff
         pg_note = ""
         if info.get("pg_admin_username"):
             if info.get("pg_admin_deleted"):
-                pg_note = f" — ادمین پاسارگارد «{info['pg_admin_username']}» هم حذف شد"
+                pg_note = f" — ادمین S-UI «{info['pg_admin_username']}» هم حذف شد"
             else:
                 pg_note = (
-                    f" — ادمین پاسارگارد «{info['pg_admin_username']}» حذف نشد "
+                    f" — ادمین S-UI «{info['pg_admin_username']}» حذف نشد "
                     "(ممکن است از قبل نبوده باشد)"
                 )
         return RedirectResponse(
@@ -1379,14 +1379,14 @@ def register_reseller_pages(app, *, render, require_admin, get_db, require_staff
         pg_group_ids = _parse_pg_group_ids(form)
         if not pg_group_ids:
             return RedirectResponse(
-                f"/plans?err={_q('حداقل یک گروه پاسارگارد الزامی است')}#reseller-plans",
+                f"/plans?err={_q('حداقل یک گروه S-UI الزامی است')}#reseller-plans",
                 status_code=303,
             )
         perms = _feature_perms_from_form(form)
         pg_role_raw = str(form.get("pg_role_id") or "").strip()
         if not pg_role_raw.isdigit():
             return RedirectResponse(
-                f"/plans?err={_q('نقش پاسارگارد الزامی است')}#reseller-plans",
+                f"/plans?err={_q('نقش S-UI الزامی است')}#reseller-plans",
                 status_code=303,
             )
         try:
@@ -1687,7 +1687,7 @@ def register_reseller_pages(app, *, render, require_admin, get_db, require_staff
         pg_group_ids = _parse_pg_group_ids(form)
         if not pg_group_ids:
             return RedirectResponse(
-                f"/resellers/plans/{plan_id}/edit?err={_q('حداقل یک گروه پاسارگارد الزامی است')}",
+                f"/resellers/plans/{plan_id}/edit?err={_q('حداقل یک گروه S-UI الزامی است')}",
                 status_code=303,
             )
         try:
@@ -1745,7 +1745,7 @@ def register_reseller_pages(app, *, render, require_admin, get_db, require_staff
         pg_role_raw = str(form.get("pg_role_id") or "").strip()
         if not pg_role_raw.isdigit():
             return RedirectResponse(
-                f"/resellers/plans/{plan_id}/edit?err={_q('نقش پاسارگارد الزامی است')}",
+                f"/resellers/plans/{plan_id}/edit?err={_q('نقش S-UI الزامی است')}",
                 status_code=303,
             )
         plan.pg_role_id = int(pg_role_raw)

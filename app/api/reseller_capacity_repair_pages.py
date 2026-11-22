@@ -14,7 +14,7 @@ from app.services.table_bulk import redirect_bulk
 
 REPAIR_PATH = "/resellers/repair-capacity"
 LIST_URL = "/resellers"
-DENIED = "فقط مالک اصلی می‌تواند ظرفیت‌ها را از پاسارگارد دوباره بخواند"
+DENIED = "فقط مالک اصلی می‌تواند ظرفیت‌ها را از S-UI دوباره بخواند"
 
 
 def register_reseller_capacity_repair_pages(app: FastAPI, *, require_staff: Callable, get_db: Callable) -> None:
@@ -28,7 +28,7 @@ def register_reseller_capacity_repair_pages(app: FastAPI, *, require_staff: Call
         report = await repair_current_capacity_snapshots(session)
         text = f"{report.fixed} نماینده اصلاح شد"
         if report.unreadable:
-            text += f"؛ {report.unreadable} مورد از پاسارگارد خوانده نشد"
+            text += f"؛ {report.unreadable} مورد از S-UI خوانده نشد"
         if report.fixed + report.unreadable >= REPAIR_BATCH:
             text += "؛ برای بقیه دوباره بزنید"
         return redirect_bulk(LIST_URL, ok=text)

@@ -22,7 +22,7 @@ RESELLER_ACCESS_NOT_FOUND = "دسترسی نمایندگی شما پیدا نش�
 NO_SHOP_SETTINGS_ACCESS = "دسترسی تنظیمات فروشگاه ندارید."
 REPRESENTATIVES_DISABLED = "قابلیت ساخت نماینده برای این حساب فعال نیست"
 PREVIEW_ONLY_ON_SHOP_BOT = "پیش‌نمایش فقط روی ربات فروشگاه شما فعال است."
-PG_ADMIN_NOT_SET = "حساب ادمین پاسارگارد تنظیم نشده است"
+PG_ADMIN_NOT_SET = "حساب ادمین S-UI تنظیم نشده است"
 BOT_TOKEN_NOT_SET = "توکن ربات ثبت نشده است"
 
 # Missing or invalid items

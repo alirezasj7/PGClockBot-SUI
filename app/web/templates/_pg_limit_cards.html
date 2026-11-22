@@ -13,7 +13,7 @@
 </div>
 {%- endmacro %}
 
-{% macro pg_snapshot_limit_board(cards, heading='سقف حساب پاسارگارد', caption='محدودیت زنده همین نقش', box_captions=true) -%}
+{% macro pg_snapshot_limit_board(cards, heading='سقف حساب S-UI', caption='محدودیت زنده همین نقش', box_captions=true) -%}
 {% if cards %}
 <section class="card pg-limit-board" aria-label="{{ heading }}">
   <header class="home-periods-head">
@@ -32,9 +32,9 @@
 {% macro pg_overview_limit_board(ov) -%}
 {% if ov and ov.ready and (ov.users or ov.traffic or ov.constraints) %}
 {% from "_pg_quota_gauges.html" import pg_quota_gauge %}
-<section class="card pg-limit-board pg-quota-top home-quota-card" aria-label="سقف حساب پاسارگارد">
+<section class="card pg-limit-board pg-quota-top home-quota-card" aria-label="سقف حساب S-UI">
   <header class="home-periods-head">
-    {{ card_title('limits', 'سقف حساب پاسارگارد') }}
+    {{ card_title('limits', 'سقف حساب S-UI') }}
     <p class="muted">
       {% if ov.username %}<span dir="ltr">{{ ov.username }}</span>{% endif %}
       {% if ov.status_label %}

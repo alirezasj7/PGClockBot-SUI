@@ -1,6 +1,6 @@
 ﻿{% extends "base.html" %}
 {% from "macros.html" import switch_chip, row_actions, page_title, table_select_head, table_select_cell, table_bulk_bar, modal_title %}
-{% block title %}تمپلیت‌های پاسارگارد{% endblock %}
+{% block title %}تمپلیت‌های S-UI{% endblock %}
 {% block content %}
 <div class="page-head">
   <div>
@@ -88,7 +88,7 @@
   <div class="ui-modal-backdrop" data-modal-close></div>
   <div class="ui-modal-panel" role="dialog" aria-modal="true">
     <div class="ui-modal-head">
-      {{ modal_title('templates', 'ساخت تمپلیت جدید', caption='تمپلیت آماده پاسارگارد', tone='pg') }}
+      {{ modal_title('templates', 'ساخت تمپلیت جدید', caption='تمپلیت آماده S-UI', tone='pg') }}
       <button type="button" class="icon-btn" data-modal-close aria-label="بستن"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <form method="post" action="/pg/templates" class="form-stack">
@@ -110,7 +110,7 @@
         </div>
       </div>
       <div class="form-field">
-        <span class="form-field-label">گروه‌های پاسارگارد</span>
+        <span class="form-field-label">گروه‌های S-UI</span>
         <div class="ui-switch-grid">
           {% for g in groups %}
           {{ switch_chip('g_' ~ g.get('id'), g.get('name') or g.get('id'), value=g.get('id')) }}
@@ -120,7 +120,7 @@
         </div>
       </div>
       <div class="actions">
-        <button class="btn" type="submit">ساخت در پاسارگارد</button>
+        <button class="btn" type="submit">ساخت در S-UI</button>
         <button type="button" class="btn btn-ghost" data-modal-close>انصراف</button>
       </div>
     </form>
@@ -155,7 +155,7 @@
         </div>
       </div>
       <div class="form-field">
-        <span class="form-field-label">گروه‌های پاسارگارد</span>
+        <span class="form-field-label">گروه‌های S-UI</span>
         <div class="ui-switch-grid" id="pg-template-edit-groups">
           {% for g in groups %}
           {{ switch_chip('g_' ~ g.get('id'), g.get('name') or g.get('id'), value=g.get('id')) }}

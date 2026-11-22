@@ -43,10 +43,10 @@ PANEL_TICK_ISSUES: tuple[TickIssue, ...] = (
 )
 
 _TICK_ISSUE_TEXT: dict[TickIssue, str] = {
-    TickIssue.NO_ADMIN: "هیچ ادمین پاسارگاردی به این نماینده متصل نیست",
-    TickIssue.ADMIN_MISSING: "ادمین پاسارگارد این نماینده در پنل پیدا نشد",
-    TickIssue.PANEL_UNAVAILABLE: "دریافت مصرف از پاسارگارد ناموفق بود",
-    TickIssue.NO_TRAFFIC_FIELD: "پاسخ پاسارگارد فیلد مصرف ترافیک ندارد",
+    TickIssue.NO_ADMIN: "هیچ ادمین S-UIی به این نماینده متصل نیست",
+    TickIssue.ADMIN_MISSING: "ادمین S-UI این نماینده در پنل پیدا نشد",
+    TickIssue.PANEL_UNAVAILABLE: "دریافت مصرف از S-UI ناموفق بود",
+    TickIssue.NO_TRAFFIC_FIELD: "پاسخ S-UI فیلد مصرف ترافیک ندارد",
     TickIssue.RATE_ZERO: (
         "نرخ هر گیگ این نماینده صفر است؛ یک پلن PAYG با نرخ مثبت به او بدهید "
         "(مصرف تا آن زمان نگه داشته می‌شود و بعد از اصلاح حساب می‌شود)"

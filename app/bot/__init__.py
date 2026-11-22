@@ -108,7 +108,6 @@ def bot_routers() -> list[Router]:
         admin,
         admin_backup,
         admin_plans,
-        admin_pg_nodes,
         admin_pg_users,
         admin_settings,
         automation_review,
@@ -202,7 +201,6 @@ def bot_routers() -> list[Router]:
         guide_editor.shop_router,
         admin_backup.router,
         admin_pg_users.router,
-        admin_pg_nodes.router,
         admin_plans.router,
         admin.router,
         stale_menu.router,
@@ -229,7 +227,6 @@ def create_dispatcher() -> Dispatcher:
         admin,
         admin_backup,
         admin_plans,
-        admin_pg_nodes,
         admin_pg_users,
         admin_settings,
         button_colors,
@@ -260,7 +257,6 @@ def create_dispatcher() -> Dispatcher:
     # Phase 4G — migrated PG families: shop-bot block only (Principal gate inside handlers).
     for r in (
         admin_pg_users.router,
-        admin_pg_nodes.router,
     ):
         r.message.middleware(block)
         r.callback_query.middleware(block)

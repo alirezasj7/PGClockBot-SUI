@@ -21,9 +21,9 @@ from app.services.pg_admin_subscription import (
 )
 
 UNLIMITED = "نامحدود"
-NO_SUBSCRIPTION = "اشتراک پاسارگارد برای این نماینده یافت نشد"
+NO_SUBSCRIPTION = "اشتراک S-UI برای این نماینده یافت نشد"
 NOT_CURRENT_CAPACITY = "همگام‌سازی فقط برای نمایندگانی است که با پلن «ظرفیت فعلی» اعطا شده‌اند"
-NO_PG_ADMIN = "ادمین پاسارگارد برای این نماینده تنظیم نشده است"
+NO_PG_ADMIN = "ادمین S-UI برای این نماینده تنظیم نشده است"
 BYTES_PER_GB = 1024**3
 
 

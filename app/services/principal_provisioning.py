@@ -105,7 +105,7 @@ def assert_can_provision_level1(staff: Mapping[str, Any] | None) -> None:
         )
     if not owner_has_pg_admin_create_capability(staff):
         raise PrincipalProvisionError(
-            "قابلیت ساخت ادمین پاسارگارد برای این حساب فعال نیست",
+            "قابلیت ساخت ادمین S-UI برای این حساب فعال نیست",
             code="pg_capability_denied",
         )
 
@@ -168,9 +168,9 @@ async def _resolve_pg_role(
     try:
         rid = int(pg_role_id)
     except (TypeError, ValueError) as exc:
-        raise PrincipalProvisionError("نقش پاسارگارد نامعتبر است", code="role_invalid") from exc
+        raise PrincipalProvisionError("نقش S-UI نامعتبر است", code="role_invalid") from exc
     if rid <= 0:
-        raise PrincipalProvisionError("نقش پاسارگارد نامعتبر است", code="role_invalid")
+        raise PrincipalProvisionError("نقش S-UI نامعتبر است", code="role_invalid")
 
     from app.services.pasarguard import get_pg
 
@@ -178,7 +178,7 @@ async def _resolve_pg_role(
         roles = await get_pg().get_admin_roles()
     except Exception as exc:
         raise PrincipalProvisionError(
-            f"دریافت نقش‌های پاسارگارد ناموفق: {exc}",
+            f"دریافت نقش‌های S-UI ناموفق: {exc}",
             code="pg_roles_unavailable",
         ) from exc
 
@@ -188,13 +188,13 @@ async def _resolve_pg_role(
     )
     if chosen is None:
         raise PrincipalProvisionError(
-            "نقش پاسارگارد یافت نشد",
+            "نقش S-UI یافت نشد",
             code="role_not_found",
         )
     # Local safety: never mint owner-equivalent PG admins for Level-1 Principals.
     if chosen.get("is_owner"):
         raise PrincipalProvisionError(
-            "نمی‌توان نقش مالک پاسارگارد را به Principal سطح ۱ داد",
+            "نمی‌توان نقش مالک S-UI را به Principal سطح ۱ داد",
             code="owner_role_forbidden",
         )
     return rid, chosen
@@ -298,7 +298,7 @@ async def provision_level1_principal(
     owner_pg = _owner_env_pg_username()
     if owner_pg and uname.strip().lower() == owner_pg.lower():
         raise PrincipalProvisionError(
-            "نام کاربری پاسارگارد مالک قابل استفاده برای Principal جدید نیست",
+            "نام کاربری S-UI مالک قابل استفاده برای Principal جدید نیست",
             code="owner_pg_forbidden",
         )
 
@@ -327,7 +327,7 @@ async def provision_level1_principal(
     dup = await _principal_by_pg_username(session, uname)
     if dup is not None:
         raise PrincipalProvisionError(
-            f"Principal با نام پاسارگارد «{uname}» از قبل وجود دارد",
+            f"Principal با نام S-UI «{uname}» از قبل وجود دارد",
             code="pg_username_taken",
         )
 
@@ -352,7 +352,7 @@ async def provision_level1_principal(
         pwd_enc = encrypt_secret(request.pg_password)
         if not pwd_enc:
             raise PrincipalProvisionError(
-                "رمز‌گذاری رمز پاسارگارد ناموفق بود",
+                "رمز‌گذاری رمز S-UI ناموفق بود",
                 code="encrypt_failed",
             )
 

@@ -98,13 +98,13 @@ def _web_username_for_principal(principal: OrgPrincipal, web_username: str) -> s
     pg = _norm_username(principal.pg_username)
     if not pg:
         raise PrincipalWebIdentityError(
-            "نام کاربری پاسارگارد این نماینده موجود نیست",
+            "نام کاربری S-UI این نماینده موجود نیست",
             code="pg_username_missing",
         )
     posted = _norm_username(web_username)
     if posted != pg:
         raise PrincipalWebIdentityError(
-            "نام کاربری پنل باید همان نام کاربری پاسارگارد باشد",
+            "نام کاربری پنل باید همان نام کاربری S-UI باشد",
             code="web_pg_mismatch",
         )
     return pg
@@ -307,7 +307,7 @@ def _assert_pg_identity_ready(principal: OrgPrincipal) -> None:
     uname = (principal.pg_username or "").strip()
     if not uname:
         raise PrincipalWebIdentityError(
-            "هویت پاسارگارد Principal سطح ۲ موجود نیست",
+            "هویت S-UI Principal سطح ۲ موجود نیست",
             code="pg_identity_missing",
         )
     enc = (principal.pg_password_enc or "").strip() or (
@@ -315,7 +315,7 @@ def _assert_pg_identity_ready(principal: OrgPrincipal) -> None:
     ).strip()
     if not enc:
         raise PrincipalWebIdentityError(
-            "اعتبارنامه پاسارگارد Principal سطح ۲ موجود نیست",
+            "اعتبارنامه S-UI Principal سطح ۲ موجود نیست",
             code="pg_credential_missing",
         )
 

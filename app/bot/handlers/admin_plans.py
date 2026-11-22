@@ -362,7 +362,7 @@ async def _build_custom_screen(session: AsyncSession) -> tuple[str, InlineKeyboa
             rows.append([_ib(f"{mark} {label}", f"adm:plans:tog:{key}", st)])
         else:
             rows.append([_ib(label, f"adm:plans:edit:{key}", st)])
-    rows.append([_ib("🔗 اتصال پاسارگارد", "adm:plans:custom:pg", st)])
+    rows.append([_ib("🔗 اتصال S-UI", "adm:plans:custom:pg", st)])
     rows.append(_back_row(BACK_USERS_KIND, ui))
     tpl = (ui.get("custom_plan_template_id") or "").strip()
     groups = (ui.get("custom_plan_group_ids") or "").strip()
@@ -370,7 +370,7 @@ async def _build_custom_screen(session: AsyncSession) -> tuple[str, InlineKeyboa
     text = (
         "✨ <b>پلن دلخواه</b>\n"
         f"فروش: {'فعال' if on(ui.get('custom_plan_enabled')) else 'خاموش'}\n"
-        f"پاسارگارد: {link}"
+        f"S-UI: {link}"
     )
     return text, _kb(rows)
 
@@ -416,8 +416,8 @@ async def _build_trial_screen(session: AsyncSession) -> tuple[str, InlineKeyboar
         [_ib("نام", "adm:plans:trial:name", st)],
         [_ib("مدت (روز)", "adm:plans:trial:days", st)],
         [_ib("حجم (گیگ)", "adm:plans:trial:gb", st)],
-        [_ib("تمپلیت پاسارگارد", "adm:plans:trial:tpl", st)],
-        [_ib("گروه پاسارگارد", "adm:plans:trial:grp", st)],
+        [_ib("تمپلیت S-UI", "adm:plans:trial:tpl", st)],
+        [_ib("گروه S-UI", "adm:plans:trial:grp", st)],
         _back_row(BACK_USERS_KIND, ui),
     ]
     return f"🧪 <b>پلن تست</b>\n\n{body}", _kb(rows)
@@ -1229,7 +1229,7 @@ async def _custom_pg_summary(session: AsyncSession) -> tuple[str, InlineKeyboard
     text = (
         "🔗 <b>اتصال پلن دلخواه</b>\n\n"
         f"فروش: {'فعال' if enabled else 'خاموش'}\n"
-        f"پاسارگارد: {link}"
+        f"S-UI: {link}"
     )
     rows = [
         [
@@ -1495,7 +1495,7 @@ def _resplan_detail_keyboard(plan: ResellerPlan) -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text="📁 گروه PG", callback_data=f"adm:resplan:edit:grp:{pid}")]
     )
     rows.append(
-        [InlineKeyboardButton(text="🎭 نقش پاسارگارد", callback_data=f"adm:resplan:edit:role:{pid}")]
+        [InlineKeyboardButton(text="🎭 نقش S-UI", callback_data=f"adm:resplan:edit:role:{pid}")]
     )
     rows.extend(
         [
@@ -1830,7 +1830,7 @@ async def _show_resplan_groups(callback: CallbackQuery, state: FSMContext, plan_
         rows.append(
             [
                 InlineKeyboardButton(
-                    text="گروهی از پاسارگارد لود نشد",
+                    text="گروهی از S-UI لود نشد",
                     callback_data=f"adm:resplan:view:{plan_id}",
                 )
             ]
@@ -2167,7 +2167,7 @@ async def resplan_price(message: Message, state: FSMContext, session: AsyncSessi
         await ask_text(
             message,
             state,
-            prompt="📁 گروه پاسارگارد را انتخاب کنید (حداقل یک گروه الزامی):",
+            prompt="📁 گروه S-UI را انتخاب کنید (حداقل یک گروه الزامی):",
             cancel_code="adm_pln",
             return_to=await form_origin(state),
             fsm_state=AdminPlansStates.res_plan_link,
@@ -2254,7 +2254,7 @@ async def resplan_rate_gb(
     await ask_text(
         message,
         state,
-        prompt="📁 گروه پاسارگارد را انتخاب کنید (حداقل یک گروه الزامی):",
+        prompt="📁 گروه S-UI را انتخاب کنید (حداقل یک گروه الزامی):",
         cancel_code="adm_pln",
         return_to=await form_origin(state),
         fsm_state=AdminPlansStates.res_plan_link,
@@ -2295,7 +2295,7 @@ async def resplan_role_cancel(message: Message, state: FSMContext, session: Asyn
         await state.set_state(None)
         await _answer_plans_cancel(message, state, session)
         return
-    await message.answer("نقش پاسارگارد را از دکمه‌های زیر پیام انتخاب کنید.")
+    await message.answer("نقش S-UI را از دکمه‌های زیر پیام انتخاب کنید.")
 
 async def _show_resplan_add_groups(message: Message, state: FSMContext) -> None:
     data = await state.get_data()
@@ -2336,7 +2336,7 @@ async def _show_resplan_add_groups(message: Message, state: FSMContext) -> None:
         )
     else:
         rows.append(
-            [InlineKeyboardButton(text="گروهی از پاسارگارد لود نشد", callback_data="adm:plans:aud:resellers")]
+            [InlineKeyboardButton(text="گروهی از S-UI لود نشد", callback_data="adm:plans:aud:resellers")]
         )
     rows.append([InlineKeyboardButton(text="❌ انصراف", callback_data="adm:plans:aud:resellers")])
     text = (
@@ -2373,7 +2373,7 @@ async def _show_resplan_role_picker(
         )
     if not rows:
         rows.append(
-            [InlineKeyboardButton(text="نقشی پیدا نشد؛ اول در پاسارگارد نقش بسازید", callback_data="adm:plans:aud:resellers")]
+            [InlineKeyboardButton(text="نقشی پیدا نشد؛ اول در S-UI نقش بسازید", callback_data="adm:plans:aud:resellers")]
         )
     back = (
         f"adm:resplan:view:{edit_plan_id}"
@@ -2383,7 +2383,7 @@ async def _show_resplan_role_picker(
     rows.append([kb.back_button(None, back)])
     await safe_edit_text(
         message,
-        "🎭 <b>نقش پاسارگارد الزامی است</b>\n"
+        "🎭 <b>نقش S-UI الزامی است</b>\n"
         "نقشی که هنگام تأیید نماینده به ادمین PG او داده می‌شود:",
         reply_markup=_kb(rows),
     )

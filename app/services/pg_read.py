@@ -27,8 +27,8 @@ from app.services.shop_scope import is_platform_admin, shop_owner_id
 
 # Shown when a restricted principal cannot safely read PG resources.
 PG_READ_ISOLATION_MSG = (
-    "خواندن امن داده‌های پاسارگارد برای این حساب ممکن نیست "
-    "— اعتبارنامه پاسارگارد ذخیره نشده است"
+    "خواندن امن داده‌های S-UI برای این حساب ممکن نیست "
+    "— اعتبارنامه S-UI ذخیره نشده است"
 )
 
 
@@ -99,7 +99,7 @@ async def staff_pg_read_client(
         if session is None:
             raise PgReadDenied("نشست پایگاه‌داده برای خواندن لازم است")
         if not str(staff.get("pg_admin_username") or "").strip():
-            raise PgReadDenied("هویت پاسارگارد Principal موجود نیست")
+            raise PgReadDenied("هویت S-UI Principal موجود نیست")
         try:
             from app.services.pasarguard import get_pg_for_principal
 

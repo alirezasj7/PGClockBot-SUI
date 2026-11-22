@@ -121,7 +121,7 @@ def register_security_pages(app, *, render, require_staff, get_db, get_signer, c
                 )
             ).scalars().all()
             if any((u or "").lower() == cleaned.lower() for u in staff_rows):
-                return _err("این نام کاربری قبلاً برای دسترسی وب ادمین پاسارگارد گرفته شده")
+                return _err("این نام کاربری قبلاً برای دسترسی وب ادمین S-UI گرفته شده")
 
             try:
                 if cleaned != stored_user:
@@ -190,7 +190,7 @@ def register_security_pages(app, *, render, require_staff, get_db, get_signer, c
         pg_u = (profile.pg_admin_username or "").strip().lower()
         if pg_u and cleaned != pg_u:
             return _err(
-                "نام کاربری باید همان یوزر پاسارگارد باشد (ورود یکپارچه وب‌پنل و پاسارگارد)"
+                "نام کاربری باید همان یوزر S-UI باشد (ورود یکپارچه وب‌پنل و S-UI)"
             )
 
         if cleaned != (profile.web_username or ""):
@@ -264,7 +264,7 @@ def register_security_pages(app, *, render, require_staff, get_db, get_signer, c
                 )
             ).scalars().all()
             if any((u or "").lower() == cleaned.lower() for u in staff_rows):
-                return _err("این نام کاربری قبلاً برای دسترسی وب ادمین پاسارگارد گرفته شده")
+                return _err("این نام کاربری قبلاً برای دسترسی وب ادمین S-UI گرفته شده")
             try:
                 saved = change_web_admin_username(cleaned)
                 update_env_keys({"WEB_ADMIN_USER": saved})
@@ -297,7 +297,7 @@ def register_security_pages(app, *, render, require_staff, get_db, get_signer, c
         pg_u = (profile.pg_admin_username or "").strip().lower()
         if pg_u and cleaned != pg_u:
             return _err(
-                "نام کاربری باید همان یوزر پاسارگارد باشد (ورود یکپارچه وب‌پنل و پاسارگارد)"
+                "نام کاربری باید همان یوزر S-UI باشد (ورود یکپارچه وب‌پنل و S-UI)"
             )
         clash = await session.execute(
             select(ResellerProfile).where(

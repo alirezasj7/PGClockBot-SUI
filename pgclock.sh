@@ -1408,9 +1408,6 @@ write_env_file() {
   SUI_SUBSCRIPTION_BASE_URL="${SUI_SUBSCRIPTION_BASE_URL:-}" \
   SUI_INBOUND_IDS="${SUI_INBOUND_IDS:-}" \
   SUI_ADMIN_USERNAME="${SUI_ADMIN_USERNAME:-s-ui}" \
-  PG_BASE_URL="$PG_BASE_URL" \
-  PG_USERNAME="$PG_USERNAME" \
-  PG_PASSWORD="$PG_PASSWORD" \
   WEB_PORT="$WEB_PORT" \
   WEB_SECRET="$WEB_SECRET" \
   WEB_ADMIN_USER="$WEB_ADMIN_USER" \
@@ -1431,9 +1428,6 @@ payload = {
     "SUI_SUBSCRIPTION_BASE_URL": os.environ.get("SUI_SUBSCRIPTION_BASE_URL", "").strip(),
     "SUI_INBOUND_IDS": os.environ.get("SUI_INBOUND_IDS", "").strip(),
     "SUI_ADMIN_USERNAME": os.environ.get("SUI_ADMIN_USERNAME", "s-ui").strip() or "s-ui",
-    "PG_BASE_URL": os.environ["PG_BASE_URL"],
-    "PG_USERNAME": os.environ["PG_USERNAME"],
-    "PG_PASSWORD": os.environ["PG_PASSWORD"],
     "WEB_HOST": "0.0.0.0",
     "WEB_PORT": os.environ["WEB_PORT"],
     "WEB_SECRET": os.environ["WEB_SECRET"],
@@ -1512,7 +1506,7 @@ install_systemd() {
   local start_now="${2:-1}"
   local content
   content="[Unit]
-Description=PGClockBot — PasarGuard Telegram shop
+Description=PGClockBot — S-UI Telegram shop
 After=network.target postgresql.service
 Wants=postgresql.service
 
@@ -1639,15 +1633,12 @@ cmd_install() {
   ensure_apt_packages || return 1
   ensure_python || return 1
 
-  # Defaults — all bot/admin/PasarGuard config is done in the web wizard (/setup)
+  # Bot and S-UI credentials are configured in the web wizard (/setup).
   WEB_PORT="${WEB_PORT:-9000}"
   WEB_SECRET="$(gen_secret)"
   BOT_TOKEN=""
   BOT_USERNAME=""
   ADMIN_IDS=""
-  PG_BASE_URL=""
-  PG_USERNAME=""
-  PG_PASSWORD=""
   WEB_ADMIN_USER="admin"
   WEB_ADMIN_PASSWORD=""
   PUBLIC_BASE_URL=""

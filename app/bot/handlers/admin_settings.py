@@ -350,7 +350,7 @@ SECTIONS: dict[str, dict] = {
     "service": {
         "title": "پلن تست و نام‌گذاری",
         "subs": [
-            ("naming", "نام در پاسارگارد", [
+            ("naming", "نام در S-UI", [
                 ("pg_username_prefix", "پیشوند", "text"),
                 ("pg_username_suffix", "پسوند", "text"),
                 ("pg_username_pattern", "الگو", "text"),
@@ -633,7 +633,7 @@ async def _render_sub(callback: CallbackQuery, session: AsyncSession, sec_id: st
                     callback_data="adm:st:tog:custom_plan_enabled",
                 )
             ],
-            [InlineKeyboardButton(text="اتصال پاسارگارد", callback_data="adm:custom")],
+            [InlineKeyboardButton(text="اتصال S-UI", callback_data="adm:custom")],
         ]
         await _render_fields(
             callback,
@@ -772,8 +772,8 @@ async def _trial_panel(session: AsyncSession) -> Panel:
         [InlineKeyboardButton(text="نام", callback_data="adm:st:trial:name")],
         [InlineKeyboardButton(text="مدت (روز)", callback_data="adm:st:trial:days")],
         [InlineKeyboardButton(text="حجم (گیگ)", callback_data="adm:st:trial:gb")],
-        [InlineKeyboardButton(text="تمپلیت پاسارگارد", callback_data="adm:st:trial:tpl")],
-        [InlineKeyboardButton(text="گروه پاسارگارد", callback_data="adm:st:trial:grp")],
+        [InlineKeyboardButton(text="تمپلیت S-UI", callback_data="adm:st:trial:tpl")],
+        [InlineKeyboardButton(text="گروه S-UI", callback_data="adm:st:trial:grp")],
         _back_row("adm:plans:kind:users:trial"),
     ]
     return f"🧪 <b>پلن تست</b>\n\n{body}", _kb(rows)
@@ -902,7 +902,7 @@ async def _settings_location_panel(
                     callback_data="adm:st:tog:custom_plan_enabled",
                 )
             ],
-            [InlineKeyboardButton(text="اتصال پاسارگارد", callback_data="adm:custom")],
+            [InlineKeyboardButton(text="اتصال S-UI", callback_data="adm:custom")],
         ]
         return await _fields_panel(
             session,

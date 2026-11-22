@@ -18,7 +18,7 @@ MONITOR_TEXT_DEFAULTS = {
     "connection_status_error": "دریافت وضعیت اکنون ممکن نیست؛ کمی بعد دوباره تلاش کنید.",
     "btn_connection_status_admin": "📡 وضعیت اتصال",
     "connection_status_admin_title": "📡 وضعیت اتصال",
-    "connection_status_account_prompt": "فقط نام کاربری یک کاربر تست موجود در پاسارگارد را بفرستید؛ مثلاً MattDev. این کاربر باید جدا از سرویس مشتری باشد. لینک، توکن یا رمز عبور نفرستید.",
+    "connection_status_account_prompt": "فقط نام کاربری یک کاربر تست موجود در S-UI را بفرستید؛ مثلاً MattDev. این کاربر باید جدا از سرویس مشتری باشد. لینک، توکن یا رمز عبور نفرستید.",
     "connection_status_name_prompt": "این کانفیگ با چه اسمی به کاربران نمایش داده شود؟ حداکثر ۶۴ حرف وارد کنید.",
     "connection_status_order_prompt": "ترتیب نمایش این کانفیگ را با عدد وارد کنید؛ عدد کوچک‌تر بالاتر نمایش داده می‌شود. از صفر شروع کنید.",
 }

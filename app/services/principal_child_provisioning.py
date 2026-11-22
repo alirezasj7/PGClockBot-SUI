@@ -136,7 +136,7 @@ def assert_can_provision_level2_child(staff: Mapping[str, Any] | None) -> None:
         )
     if not has_pg_admin_create_capability(staff):
         raise ChildProvisionError(
-            "قابلیت ساخت ادمین پاسارگارد برای این حساب فعال نیست",
+            "قابلیت ساخت ادمین S-UI برای این حساب فعال نیست",
             code="pg_capability_denied",
         )
 
@@ -237,15 +237,15 @@ async def _resolve_pg_role_via_parent(
     try:
         rid = int(pg_role_id)
     except (TypeError, ValueError) as exc:
-        raise ChildProvisionError("نقش پاسارگارد نامعتبر است", code="role_invalid") from exc
+        raise ChildProvisionError("نقش S-UI نامعتبر است", code="role_invalid") from exc
     if rid <= 0:
-        raise ChildProvisionError("نقش پاسارگارد نامعتبر است", code="role_invalid")
+        raise ChildProvisionError("نقش S-UI نامعتبر است", code="role_invalid")
 
     try:
         roles = await parent_pg.get_admin_roles()
     except Exception:
         raise ChildProvisionError(
-            "دریافت نقش‌های پاسارگارد ناموفق بود",
+            "دریافت نقش‌های S-UI ناموفق بود",
             code="pg_roles_unavailable",
         ) from None
 
@@ -255,12 +255,12 @@ async def _resolve_pg_role_via_parent(
     )
     if chosen is None:
         raise ChildProvisionError(
-            "نقش پاسارگارد یافت نشد",
+            "نقش S-UI یافت نشد",
             code="role_not_found",
         )
     if chosen.get("is_owner"):
         raise ChildProvisionError(
-            "نمی‌توان نقش مالک پاسارگارد را به فرزند سطح ۲ داد",
+            "نمی‌توان نقش مالک S-UI را به فرزند سطح ۲ داد",
             code="owner_role_forbidden",
         )
     return rid, chosen
@@ -381,20 +381,20 @@ async def provision_level2_child(
     owner_pg = _owner_env_pg_username()
     if owner_pg and uname.strip().lower() == owner_pg.lower():
         raise ChildProvisionError(
-            "نام کاربری پاسارگارد مالک قابل استفاده برای فرزند نیست",
+            "نام کاربری S-UI مالک قابل استفاده برای فرزند نیست",
             code="owner_pg_forbidden",
         )
     parent_pg_uname = (parent.pg_username or "").strip()
     if parent_pg_uname and uname.strip().lower() == parent_pg_uname.lower():
         raise ChildProvisionError(
-            "نام کاربری پاسارگارد والد قابل استفاده برای فرزند نیست",
+            "نام کاربری S-UI والد قابل استفاده برای فرزند نیست",
             code="parent_pg_forbidden",
         )
 
     dup = await _principal_by_pg_username(session, uname)
     if dup is not None:
         raise ChildProvisionError(
-            f"Principal با نام پاسارگارد «{uname}» از قبل وجود دارد",
+            f"Principal با نام S-UI «{uname}» از قبل وجود دارد",
             code="pg_username_taken",
         )
 
@@ -404,7 +404,7 @@ async def provision_level2_child(
         parent_pg = await get_pg_for_principal(session, principal_id=parent_id)
     except Exception:
         raise ChildProvisionError(
-            "کلاینت پاسارگارد والد در دسترس نیست",
+            "کلاینت S-UI والد در دسترس نیست",
             code="parent_pg_unavailable",
         ) from None
 
@@ -431,7 +431,7 @@ async def provision_level2_child(
         pwd_enc = encrypt_secret(request.pg_password)
         if not pwd_enc:
             raise ChildProvisionError(
-                "رمز‌گذاری رمز پاسارگارد ناموفق بود",
+                "رمز‌گذاری رمز S-UI ناموفق بود",
                 code="encrypt_failed",
             )
 

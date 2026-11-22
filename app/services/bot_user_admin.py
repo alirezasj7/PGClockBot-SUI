@@ -149,14 +149,14 @@ def assert_staff_pg_user_action(staff: dict | None, action: str) -> None:
     if acts.get(action):
         return
     labels = {
-        "create": "ساخت کاربر پاسارگارد",
-        "update": "ویرایش کاربر پاسارگارد",
-        "delete": "حذف کاربر پاسارگارد",
-        "disable": "غیرفعال‌سازی کاربر پاسارگارد",
-        "reset_usage": "ریست مصرف پاسارگارد",
+        "create": "ساخت کاربر S-UI",
+        "update": "ویرایش کاربر S-UI",
+        "delete": "حذف کاربر S-UI",
+        "disable": "غیرفعال‌سازی کاربر S-UI",
+        "reset_usage": "ریست مصرف S-UI",
     }
     raise ValueError(
-        f"نقش پاسارگارد شما اجازه {labels.get(action, action)} را ندارد"
+        f"نقش S-UI شما اجازه {labels.get(action, action)} را ندارد"
     )
 
 
@@ -219,7 +219,7 @@ async def _fetch_panel_user(pg: Any, pg_user_id: int) -> dict | BaseException:
     except PANEL_READ_ERRORS as exc:
         return exc
     if not isinstance(info, dict):
-        return ValueError("پاسخ نامعتبر پاسارگارد")
+        return ValueError("پاسخ نامعتبر S-UI")
     return info
 
 
@@ -264,7 +264,7 @@ def _snapshot_from_panel(service: UserService, url: str | None, info: dict) -> S
 def _build_snapshot(service: UserService, url: str | None, fetched: dict | BaseException) -> ServiceSnapshot:
     if isinstance(fetched, BaseException):
         logger.debug("service snapshot failed id=%s", service.id, exc_info=fetched)
-        error = "پاسارگارد پاسخ نداد" if isinstance(fetched, asyncio.TimeoutError) else user_safe_error(fetched, limit=160)
+        error = "S-UI پاسخ نداد" if isinstance(fetched, asyncio.TimeoutError) else user_safe_error(fetched, limit=160)
         return _snapshot_without_panel(service, url, status_fa="خطا", error=error)
     return _snapshot_from_panel(service, url, fetched)
 
@@ -303,7 +303,7 @@ async def _snapshots(session: AsyncSession, services: list[UserService]) -> list
 
     fetched = await asyncio.gather(*(fetch(s, pg) for s, pg in zip(services, clients, strict=True)))
     return [
-        _snapshot_without_panel(s, url, status_fa="بدون پنل", error="سرویس به پاسارگارد وصل نیست")
+        _snapshot_without_panel(s, url, status_fa="بدون پنل", error="سرویس به S-UI وصل نیست")
         if result is None
         else _build_snapshot(s, url, result)
         for s, url, result in zip(services, urls, fetched, strict=True)
@@ -501,7 +501,7 @@ async def admin_provision_service(
         group_ids = parse_group_ids(getattr(plan, "pg_group_ids", None))
         if not group_ids:
             raise ValueError(
-                "هیچ گروهی برای ساخت کاربر انتخاب نشده — در وب‌پنل برای پلن، گروه پاسارگارد را انتخاب کنید"
+                "هیچ گروهی برای ساخت کاربر انتخاب نشده — در وب‌پنل برای پلن، گروه S-UI را انتخاب کنید"
             )
 
     actor_label = (actor or "admin")[:64]
@@ -547,7 +547,7 @@ async def admin_provision_service(
                 )
             await pg.set_owner_by_id(int(pg_uid), owner_name)
         elif shop_rid and not pg_uid:
-            raise ValueError("ساخت کاربر پاسارگارد شناسه برنگرداند — اختصاص لغو شد")
+            raise ValueError("ساخت کاربر S-UI شناسه برنگرداند — اختصاص لغو شد")
 
         sub_url = user_subscription_url(pg_user if isinstance(pg_user, dict) else None)
         service = UserService(
@@ -593,7 +593,7 @@ async def admin_provision_service(
         if isinstance(exc, PasarGuardError):
             raise ValueError(
                 exc.user_message(
-                    fallback="ساخت کاربر در پاسارگارد ناموفق بود"
+                    fallback="ساخت کاربر در S-UI ناموفق بود"
                 )
             ) from exc
         if isinstance(exc, ValueError):
@@ -858,7 +858,7 @@ async def admin_set_service_quota(
 ) -> ServiceSnapshot:
     """Set absolute quota on the linked PG user and refresh local link + list cache."""
     if not service.pg_user_id:
-        raise ValueError("سرویس به پاسارگارد وصل نیست")
+        raise ValueError("سرویس به S-UI وصل نیست")
     assert_staff_pg_user_action(staff, "update")
     pg = await _pg_client_for_bot_service(session, service)
     hold = await _hold_quota_change(session, service, data_limit_bytes)
@@ -984,12 +984,12 @@ async def admin_extend_service(
     if abs(gb_n) > MAX_EXTEND_GB:
         raise ValueError("حجم نامعتبر است")
     if not service.pg_user_id:
-        raise ValueError("سرویس به پاسارگارد وصل نیست")
+        raise ValueError("سرویس به S-UI وصل نیست")
 
     pg = await _pg_client_for_bot_service(session, service)
     info = await pg.get_user_by_id(int(service.pg_user_id))
     if not isinstance(info, dict):
-        raise ValueError("کاربر پاسارگارد یافت نشد")
+        raise ValueError("کاربر S-UI یافت نشد")
 
     expire_ts = None
     if days_n != 0:
@@ -1058,10 +1058,10 @@ def _raise_pg_not_removed(presence: str, *, cause: BaseException) -> None:
     """Fail closed; message distinguishes confirmed-present vs uncertain."""
     if presence == "present":
         raise ValueError(
-            "حذف در پاسارگارد ناموفق بود (کاربر هنوز موجود است) — سرویس محلی حذف نشد"
+            "حذف در S-UI ناموفق بود (کاربر هنوز موجود است) — سرویس محلی حذف نشد"
         ) from cause
     raise ValueError(
-        "حذف در پاسارگارد ناموفق بود — سرویس محلی حذف نشد"
+        "حذف در S-UI ناموفق بود — سرویس محلی حذف نشد"
     ) from cause
 
 
@@ -1112,7 +1112,7 @@ async def ensure_pg_user_removed_or_absent(
 
     if not allow_disable_fallback:
         raise ValueError(
-            "حذف در پاسارگارد ناموفق بود — سرویس محلی حذف نشد"
+            "حذف در S-UI ناموفق بود — سرویس محلی حذف نشد"
         )
 
     try:
@@ -1131,7 +1131,7 @@ async def ensure_pg_user_removed_or_absent(
             _raise_pg_not_removed(presence, cause=dis_exc)
         logger.debug("PG disable fallback failed uid=%s", uid, exc_info=True)
         raise ValueError(
-            "حذف/غیرفعال‌سازی در پاسارگارد ناموفق بود — سرویس محلی حذف نشد"
+            "حذف/غیرفعال‌سازی در S-UI ناموفق بود — سرویس محلی حذف نشد"
         ) from dis_exc
 
 

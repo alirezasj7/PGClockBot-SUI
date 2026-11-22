@@ -27,7 +27,7 @@
     {'key': 'enable', 'label': 'فعال', 'confirm': '{n} کاربر فعال شوند؟', 'confirm_title': 'فعال‌سازی گروهی', 'confirm_label': 'فعال'},
     {'key': 'reset', 'label': 'ریست', 'confirm': 'مصرف {n} کاربر ریست شود؟', 'confirm_title': 'ریست گروهی', 'confirm_label': 'ریست', 'warn': true},
     {'key': 'revoke', 'label': 'ابطال ساب', 'confirm': 'سابسکرایب {n} کاربر ابطال شود؟', 'confirm_title': 'ابطال گروهی', 'confirm_label': 'ابطال', 'warn': true},
-    {'key': 'delete', 'label': 'حذف', 'class': 'btn-danger', 'confirm': '{n} کاربر پاسارگارد حذف شوند؟', 'confirm_title': 'حذف گروهی', 'confirm_label': 'حذف', 'danger': true},
+    {'key': 'delete', 'label': 'حذف', 'class': 'btn-danger', 'confirm': '{n} کاربر S-UI حذف شوند؟', 'confirm_title': 'حذف گروهی', 'confirm_label': 'حذف', 'danger': true},
   ]) }}
   {% endif %}
   <div class="table-wrap">
@@ -125,7 +125,7 @@
             <form method="post" action="/pg/users/{{ uid }}/revoke" data-confirm="سابسکرایب ابطال شود؟" data-confirm-title="ابطال سابسکرایب" data-confirm-warn="1" data-confirm-label="ابطال"><button class="btn btn-ghost btn-sm" type="submit">ابطال ساب</button></form>
             {% endif %}
             {% if can_delete and uid %}
-            <form method="post" action="/pg/users/{{ uid }}/delete" data-confirm="کاربر پاسارگارد حذف شود؟" data-confirm-title="تأیید حذف" data-confirm-danger="1" data-confirm-label="حذف">
+            <form method="post" action="/pg/users/{{ uid }}/delete" data-confirm="کاربر S-UI حذف شود؟" data-confirm-title="تأیید حذف" data-confirm-danger="1" data-confirm-label="حذف">
               <button class="btn btn-danger btn-sm" type="submit">حذف</button>
             </form>
             {% endif %}
@@ -170,7 +170,7 @@
   <div class="ui-modal-backdrop" data-modal-close></div>
   <div class="ui-modal-panel ui-modal-panel-lg" role="dialog" aria-modal="true" aria-labelledby="pg-user-create-title">
     <div class="ui-modal-head">
-      {{ modal_title('users', 'ساخت کاربر پاسارگارد', caption='کاربر مستقیم در پاسارگارد', tone='pg', heading_id='pg-user-create-title') }}
+      {{ modal_title('users', 'ساخت کاربر S-UI', caption='کاربر مستقیم در S-UI', tone='pg', heading_id='pg-user-create-title') }}
       <button type="button" class="icon-btn" data-modal-close aria-label="بستن"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <form method="post" action="/pg/users" class="form-stack" id="pg-user-create-form">
@@ -221,7 +221,7 @@
           <small class="muted">خالی = طبق سقف نقش (در صورت وجود) یا نامحدود</small>
         </label>
         <div class="form-field">
-          <span class="form-field-label">گروه‌های پاسارگارد (حداقل یکی)</span>
+          <span class="form-field-label">گروه‌های S-UI (حداقل یکی)</span>
           <div class="ui-switch-grid">
             {% for g in groups %}
             {{ switch_chip('group_' ~ g.get('id'), g.get('name') or g.get('id'), value=g.get('id')) }}
@@ -233,7 +233,7 @@
       </div>
 
       <div id="pg-user-mode-template" class="form-stack" {% if default_mode != 'template' %}style="display:none"{% endif %}>
-        <label class="form-field">تمپلیت پاسارگارد
+        <label class="form-field">تمپلیت S-UI
           <select name="template_id" id="pg-user-template">
             <option value="">— انتخاب —</option>
             {% for t in templates %}
@@ -272,7 +272,7 @@
       {% endif %}
       <label class="form-field">نام کاربری
         <input id="pg-edit-username" type="text" readonly disabled dir="ltr" />
-        <small class="muted">در پاسارگارد امکان تغییر نام کاربری وجود ندارد</small>
+        <small class="muted">در S-UI امکان تغییر نام کاربری وجود ندارد</small>
       </label>
       <div class="form-row">
         <label class="form-field">حجم (گیگابایت)

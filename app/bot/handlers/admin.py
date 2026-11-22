@@ -196,7 +196,7 @@ def _plan_line(p: Plan) -> str:
     elif p.pg_group_ids:
         link = f"گروه {p.pg_group_ids}"
     else:
-        link = "⚠️ بدون اتصال پاسارگارد"
+        link = "⚠️ بدون اتصال S-UI"
     return (
         f"{flag} <b>#{p.id} {html.escape(p.name)}</b>\n"
         f"💰 {format_toman(p.price, get_settings().currency)} · {link}"
@@ -226,7 +226,7 @@ async def _custom_link_summary(session: AsyncSession) -> tuple[str, InlineKeyboa
     text = (
         "✨ <b>اتصال پلن دلخواه</b>\n\n"
         f"فروش: {'فعال' if enabled else 'خاموش'}\n"
-        f"پاسارگارد: {link}\n\n"
+        f"S-UI: {link}\n\n"
         "قیمت و محدوده → پلن‌ها ← پلن دلخواه (یا وب‌پنل)"
     )
     rows = [
@@ -269,7 +269,7 @@ async def _plan_detail_text(p: Plan, *, category_name: str | None = None) -> str
         f"حجم: {gb}\n"
         f"برچسب دسته: {cat}\n"
         f"وضعیت: {'فعال' if p.is_active else 'خاموش'}\n"
-        f"اتصال پاسارگارد: {link}"
+        f"اتصال S-UI: {link}"
     )
 
 async def _plan_category_label(session: AsyncSession, plan: Plan) -> str | None:
@@ -344,7 +344,7 @@ def _plan_detail_keyboard(p: Plan, ui: dict | None = None) -> InlineKeyboardMark
         rows.append(
             [
                 kb._ikb(
-                    "🧹 حذف اتصال پاسارگارد",
+                    "🧹 حذف اتصال S-UI",
                     callback_data=f"adm:plan:clearlink:{p.id}",
                     style=st,
                 )
@@ -998,8 +998,8 @@ async def adm_plan_edit_ask(
         "gb": "حجم را به گیگابایت بفرستید. برای نامحدود <code>0</code> بفرستید:",
         "desc": "توضیح (خالی = حذف):",
         "sort": "ترتیب نمایش را با عدد بفرستید؛ عدد کوچک‌تر بالاتر نمایش داده می‌شود:",
-        "prefix": "پیشوند نام کاربری پاسارگارد (خالی = پیش‌فرض):",
-        "suffix": "پسوند نام کاربری پاسارگارد (خالی = حذف):",
+        "prefix": "پیشوند نام کاربری S-UI (خالی = پیش‌فرض):",
+        "suffix": "پسوند نام کاربری S-UI (خالی = حذف):",
     }
     await state.update_data(
         user_plan_edit_id=int(pid_raw),
@@ -1237,7 +1237,7 @@ async def plan_gb(
     await state.update_data(gb=None if gb <= 0 else gb)
     await state.set_state(AdminStates.add_plan_link)
     await message.answer(
-        "اتصال پاسارگارد را انتخاب کنید:",
+        "اتصال S-UI را انتخاب کنید:",
         reply_markup=InlineKeyboardMarkup(
             inline_keyboard=[
                 [InlineKeyboardButton(text="📋 از تمپلیت", callback_data="adm:plan:new:mode:tpl")],
@@ -1367,7 +1367,7 @@ async def _show_template_picker(callback: CallbackQuery, *, plan_id: int) -> Non
         )
     back = f"adm:plan:view:{plan_id}" if plan_id else "adm:plans"
     rows.append([kb.back_button(None, back)])
-    text = "📋 یک تمپلیت پاسارگارد انتخاب کنید:"
+    text = "📋 یک تمپلیت S-UI انتخاب کنید:"
     if callback.message:
         await safe_edit_text(
             callback.message,
@@ -1577,7 +1577,7 @@ async def adm_plan_new_back_link(callback: CallbackQuery, state: FSMContext, db_
     if callback.message:
         await safe_edit_text(
             callback.message,
-            "اتصال پاسارگارد را انتخاب کنید:",
+            "اتصال S-UI را انتخاب کنید:",
             reply_markup=InlineKeyboardMarkup(
                 inline_keyboard=[
                     [InlineKeyboardButton(text="📋 از تمپلیت", callback_data="adm:plan:new:mode:tpl")],
@@ -1684,7 +1684,7 @@ async def adm_plan_new_color(
         await callback.answer(feedback.NOT_ADMIN, show_alert=True)
         return
     if await state.get_state() != AdminStates.add_plan_color.state:
-        await callback.answer("ابتدا اتصال پاسارگارد را انتخاب کنید", show_alert=True)
+        await callback.answer("ابتدا اتصال S-UI را انتخاب کنید", show_alert=True)
         return
     from app.services.button_styles import parse_plan_button_style_callback
 
@@ -2053,7 +2053,7 @@ async def _show_custom_template_picker(callback: CallbackQuery) -> None:
     rows.append([kb.back_button(None, "adm:custom")])
     if callback.message:
         await callback.message.edit_text(
-            "📋 تمپلیت پاسارگارد برای پلن دلخواه:",
+            "📋 تمپلیت S-UI برای پلن دلخواه:",
             reply_markup=InlineKeyboardMarkup(inline_keyboard=rows),
         )
 
@@ -2867,7 +2867,7 @@ def _reseller_wallet_confirm_text(user: BotUser, amount: int, direction: str, *,
     else:
         lines.append(f"موجودی بعد از تأیید: {format_toman(after, currency)}")
         if payg and direction == "debit" and after == 0:
-            lines.append("⚠️ موجودی صفر می‌شود و ادمین پاسارگارد نماینده و همهٔ کاربرانش همان لحظه قطع می‌شوند.")
+            lines.append("⚠️ موجودی صفر می‌شود و ادمین S-UI نماینده و همهٔ کاربرانش همان لحظه قطع می‌شوند.")
     lines.append("\nاعمال شود؟")
     return "\n".join(lines)
 
@@ -3113,12 +3113,12 @@ async def adm_users_service_delete_ask(
         text = (
             f"⚠️ <b>حذف سرویس #{service_id}</b>\n\n"
             f"سرویس <code>{html.escape(str(label))}</code> از بیرون ربات اضافه شده است.\n"
-            "«جدا شود» فقط آن را از لیست مشتری برمی‌دارد و حساب VPN در پاسارگارد می‌ماند. "
-            "«حذف همراه حساب» حساب پاسارگارد را هم برای همیشه حذف می‌کند و برگشت‌ناپذیر است."
+            "«جدا شود» فقط آن را از لیست مشتری برمی‌دارد و حساب VPN در S-UI می‌ماند. "
+            "«حذف همراه حساب» حساب S-UI را هم برای همیشه حذف می‌کند و برگشت‌ناپذیر است."
             if external
             else (
                 f"⚠️ <b>حذف سرویس #{service_id}</b>\n\n"
-                f"سرویس <code>{html.escape(str(label))}</code> و کاربر پاسارگارد مرتبط "
+                f"سرویس <code>{html.escape(str(label))}</code> و کاربر S-UI مرتبط "
                 f"برای همیشه حذف شوند؟\nاین عمل برگشت‌ناپذیر است."
             )
         )
@@ -3165,7 +3165,7 @@ async def adm_users_service_delete(
     except Exception as e:
         await callback.answer(user_safe_error(e, limit=160), show_alert=True)
         return
-    done = f"سرویس #{service_id} از لیست مشتری جدا شد؛ حساب پاسارگارد حفظ شد." if detach_only else f"سرویس #{service_id} حذف شد."
+    done = f"سرویس #{service_id} از لیست مشتری جدا شد؛ حساب S-UI حفظ شد." if detach_only else f"سرویس #{service_id} حذف شد."
     await callback.answer(done, show_alert=True)
     if callback.message:
         await safe_edit_text(
@@ -3958,13 +3958,13 @@ async def _reseller_card(session: AsyncSession, user: BotUser) -> tuple[str, Inl
         f"یوزرنیم: @{html.escape(user.username or '—')}\n"
         f"تگ ریسک: {html.escape(tag_line)}\n"
         f"کیف پول: {format_toman(user.wallet_balance, get_settings().currency)}\n"
-        f"ادمین پاسارگارد: <code>{html.escape(str(pg_uname))}</code>\n"
+        f"ادمین S-UI: <code>{html.escape(str(pg_uname))}</code>\n"
         f"حالت پرداخت: {html.escape(mode)}\n"
         f"نمایندگی: {active}{suspended}\n"
         f"ربات اختصاصی: {html.escape(bot_uname)}\n"
         f"سرویس‌های فروشگاه: {shop_svc_count}\n"
         f"{_oversell_line(profile)}\n"
-        f"<i>سرویس‌های پاسارگارد = کاربران VPN زیر ادمین نماینده</i>"
+        f"<i>سرویس‌های S-UI = کاربران VPN زیر ادمین نماینده</i>"
     )
     markup = kb.admin_reseller_actions(
         user.id,
@@ -4398,7 +4398,7 @@ async def adm_resellers_services(
         if callback.message:
             await safe_edit_text(
                 callback.message,
-                "حساب ادمین پاسارگارد برای این نماینده تنظیم نشده است.",
+                "حساب ادمین S-UI برای این نماینده تنظیم نشده است.",
                 reply_markup=back_kb,
             )
         return
@@ -4440,7 +4440,7 @@ async def adm_resellers_services(
         page_label = f"{page + 1}"
         total_bit = ""
     text = (
-        f"📦 <b>سرویس‌های پاسارگارد نماینده</b>\n"
+        f"📦 <b>سرویس‌های S-UI نماینده</b>\n"
         f"ادمین: <code>{html.escape(uname)}</code>\n"
         f"صفحه {page_label}{total_bit}"
     )
@@ -5057,7 +5057,7 @@ async def pg_stats(
                 f"خطا: {user_safe_error(e)}", reply_markup=markup
             )
         return
-    text = "🏠 <b>نمای کلی پاسارگارد</b>\n\n" + format_system_stats(stats)
+    text = "🏠 <b>نمای کلی S-UI</b>\n\n" + format_system_stats(stats)
     if callback.message:
         await callback.message.edit_text(text[:3500], reply_markup=markup)
 
