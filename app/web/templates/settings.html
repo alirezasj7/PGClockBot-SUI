@@ -4,6 +4,7 @@
 {% from "_panel_settings_tabs.html" import panel_settings_tabs %}
 {% block title %}{% if is_panel_settings %}تنظیمات وب پنل{% else %}تنظیمات{% endif %}{% endblock %}
 {% block content %}
+<script src="/static/settings-show-when.js?v={{ app_version }}" defer></script>
 <div class="page-head">
   <div>
     {% if is_panel_settings %}
@@ -195,7 +196,7 @@
   if (!form || !sample) return;
   function rnd(){ return Math.random().toString(36).slice(2,10); }
   function render(){
-    const prefix = (form.querySelector('[name="s_pg_username_prefix"]')||{}).value || 'clk';
+    const prefix = (form.querySelector('[name="s_pg_username_prefix"]')||{}).value?.trim() ?? 'clk';
     const suffix = (form.querySelector('[name="s_pg_username_suffix"]')||{}).value || '';
     const pattern = (form.querySelector('[name="s_pg_username_pattern"]')||{}).value || '{prefix}_{random}{suffix}';
     let out;
@@ -209,9 +210,9 @@
         .replaceAll('{plan_unit}', 'GB')
         .replaceAll('{username}', 'ali_user');
     } catch (e) {
-      out = prefix + '_' + rnd() + suffix;
+      out = (prefix ? prefix + '_' : '') + rnd() + suffix;
     }
-    sample.textContent = out;
+    sample.textContent = out.trim().replace(/^_+|_+$/g, '') || rnd();
   }
   form.addEventListener('input', render);
   form.addEventListener('change', render);

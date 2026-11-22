@@ -239,7 +239,7 @@ def _random_username(
     """
     random_part = _random_alnum(8)
     id_part = "" if user_id is None else str(user_id)
-    prefix = (prefix or "clk").strip() or "clk"
+    prefix = (prefix or "").strip()
     suffix = suffix or ""
     if pattern and pattern.strip():
         from app.services.message_variables import DOMAIN_NAMING, render_message_template
@@ -257,8 +257,8 @@ def _random_username(
             html=False,
         ).strip()
         if built and "{" not in built:
-            return built
-    base = f"{prefix}_{random_part}"
+            return built.strip("_") or _random_alnum(8)
+    base = f"{prefix}_{random_part}" if prefix else random_part
     return f"{base}{suffix}" if suffix else base
 
 
@@ -280,7 +280,7 @@ def resolve_username_naming(
             return raw
         return (settings.get(key) or default).strip() or default
 
-    prefix = _pick(plan_prefix, "pg_username_prefix", "clk") or "clk"
+    prefix = (plan_prefix or "").strip() or (settings.get("pg_username_prefix", "clk") or "").strip()
     suffix = _pick(plan_suffix, "pg_username_suffix", "")
     pattern = _pick(
         plan_pattern,

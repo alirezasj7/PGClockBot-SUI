@@ -9,6 +9,15 @@ from unittest.mock import AsyncMock, patch
 
 
 class ResolveUsernameNamingTests(unittest.TestCase):
+    def test_saved_empty_global_prefix_is_preserved(self):
+        from app.services.orders import _random_username, resolve_username_naming
+
+        prefix, suffix, pattern = resolve_username_naming({"pg_username_prefix": ""})
+        self.assertEqual(prefix, "")
+        with patch("app.services.orders._random_alnum", return_value="a8k2x9q1"):
+            self.assertEqual(_random_username(prefix, suffix, pattern), "a8k2x9q1")
+            self.assertEqual(_random_username(prefix, suffix, "{prefix}_{id}"), "a8k2x9q1")
+
     def test_empty_plan_inherits_global(self):
         from app.services.orders import resolve_username_naming
 
